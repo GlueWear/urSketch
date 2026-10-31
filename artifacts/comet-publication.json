@@ -1,0 +1,18 @@
+{
+  "cass": {
+    "da": "~2026.10.31..18.27.07..cefd"
+  },
+  "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgY2xhc3M9ImJyYW5kLWxvZ28iIGFyaWEtaGlkZGVuPSJ0cnVlIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2LjQgNi40KSBzY2FsZSgwLjgpIj48ZyB0cmFuc2Zvcm09InJvdGF0ZSgtNiAyOCAzNSkiPjxyZWN0IHg9IjQiIHk9IjEwIiB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHJ4PSIxMSIgZmlsbD0iIzMyNjg0ZSIvPjx0ZXh0IHg9IjI4IiB5PSI0OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y3ZjdmMCIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc3R5bGU9Iml0YWxpYyIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iNDYiPnU8L3RleHQ+PC9nPjx0ZXh0IHg9IjUwIiB5PSIyMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2VkYzc2YiIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsc2VyaWYiIGZvbnQtc2l6ZT0iMjciPuKcszwvdGV4dD48L2c+PC9zdmc+Cg==",
+  "title": "urSketch",
+  "license": "Unspecified",
+  "version": "0.6.0",
+  "desk": "ursketch",
+  "website": "",
+  "ship": "~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod",
+  "href": {
+    "site": "/apps/ursketch"
+  },
+  "hash": "0v17.27h0p.6576i.8dmn8.uut2r.mdkvk.8vphj.s6p4g.edok7.mrloo.d3kip",
+  "color": "0x32.684e",
+  "info": "Draw, guess, and laugh together. Multiplayer drawing rooms hosted on Urbit ships."
+}

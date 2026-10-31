@@ -1,0 +1,12 @@
+{
+  "commands": 1600,
+  "batches": 40,
+  "oldRepeatedSnapshotJsonBytes": 4463815,
+  "newDeltaJsonBytes": 85583,
+  "reductionPercent": 98.08273864396261,
+  "fullObjectSnapshotJsonBytes": 217765,
+  "compactSnapshotJsonBytes": 82698,
+  "snapshotReductionPercent": 62.02420039951324,
+  "firstDeltaJsonBytes": 1916,
+  "lastDeltaJsonBytes": 2017
+}

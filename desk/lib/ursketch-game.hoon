@@ -1,0 +1,147 @@
+/+  *ursketch-types
+|%
+++  words
+  ^-  (list @t)
+  ~['airplane' 'anchor' 'apple' 'astronaut' 'avocado' 'backpack' 'banana' 'basketball' 'bathtub' 'beach' 'bear' 'bicycle' 'bird' 'birthday' 'book' 'bridge' 'butterfly' 'cactus' 'camera' 'campfire' 'castle' 'cat' 'caterpillar' 'cheese' 'cherry' 'clock' 'cloud' 'compass' 'crab' 'crown' 'diamond' 'dinosaur' 'dog' 'dolphin' 'donut' 'dragon' 'drum' 'elephant' 'envelope' 'eye' 'fireworks' 'fish' 'flower' 'football' 'frog' 'giraffe' 'guitar' 'hamburger' 'hammer' 'helicopter' 'house' 'ice cream' 'island' 'jellyfish' 'key' 'kite' 'ladder' 'lighthouse' 'lightning' 'lion' 'lobster' 'lollipop' 'moon' 'mountain' 'mushroom' 'octopus' 'owl' 'panda' 'parachute' 'penguin' 'piano' 'pineapple' 'pirate' 'pizza' 'planet' 'popcorn' 'rainbow' 'robot' 'rocket' 'sandcastle' 'scissors' 'shark' 'skateboard' 'snail' 'snowman' 'spider' 'sunflower' 'sword' 'telescope' 'tornado' 'train' 'tree' 'turtle' 'umbrella' 'unicorn' 'volcano' 'watermelon' 'whale' 'windmill' 'wizard']
+++  migrate-room
+  |=  r=old-room
+  ^-  room
+  :*  title.r
+      owner.r
+      players.r
+      phase.r
+      turn.r
+      token.r
+      deadline.r
+      answer.r
+      choices.r
+      (turn lines.r |=(l=old-line [color.l width.l x1.l y1.l x2.l y2.l %stroke 100 %.n 0 '']))
+      chat.r
+      0
+      ~
+  ==
+++  migrate-v3
+  |=  r=room-v3
+  ^-  room
+  [title.r owner.r players.r phase.r turn.r token.r deadline.r answer.r choices.r lines.r chat.r 0 ~]
+++  hint
+  |=  [r=room now=@da]
+  ^-  room
+  ?>  ?&(?=(%drawing phase.r) (lth hints.r 3))
+  ?>  !(lien players.r |=(p=player solved.p))
+  =.  r  r(hints +(hints.r))
+  ?:  =(hints.r 1)  r
+  =/  letters=(list @tD)  (trip answer.r)
+  =/  available=(list @ud)
+    %+  skim  (gulf 0 (dec (lent letters)))
+    |=  i=@ud
+    ?&(!=((snag i letters) ' ') !(~(has in revealed.r) i))
+  ?~  available  r
+  =/  available=(list @ud)  available
+  =/  pick=@ud  (snag (mod (mug [now token.r hints.r revealed.r]) (lent available)) available)
+  r(revealed (~(put in revealed.r) pick))
+++  hint-mask
+  |=  r=room
+  ^-  @t
+  ?.  ?&(?=(%drawing phase.r) (gth hints.r 0))  ''
+  =/  letters=(list @tD)  (trip answer.r)
+  %-  crip
+  %+  turn  (gulf 0 (dec (lent letters)))
+  |=  i=@ud
+  =/  c=@tD  (snag i letters)
+  ?:  ?|(=(c ' ') (~(has in revealed.r) i))  c
+  '_'
+++  depart
+  |=  [r=room who=@p now=@da]
+  ^-  room
+  =/  artist=?  ?&(?=(^ players.r) =(who who.i.players.r))
+  =/  remaining=(list player)  (skip players.r |=(p=player =(who who.p)))
+  ?~  remaining
+    r(players ~, phase %waiting, deadline ~2000.1.1, token +(token.r), lines ~, answer '', choices ~, hints 0, revealed ~)
+  =.  r  r(players remaining, owner ?:(=(who owner.r) who.i.remaining owner.r))
+  ?:  (lth (lent remaining) 2)
+    r(phase %waiting, deadline ~2000.1.1, token +(token.r), answer '', choices ~, hints 0, revealed ~)
+  ?:  ?&(artist ?|(?=(%choosing phase.r) ?=(%drawing phase.r) ?=(%reveal phase.r)))
+    (choose r now)
+  ?:  ?&(?=(%drawing phase.r) (levy (slag 1 players.r) |=(p=player solved.p)))
+    (reveal r now)
+  r
+++  fresh
+  |=  [title=@t owner=@p]
+  ^-  room
+  [title owner ~[[owner 0 %.n]] %waiting 0 0 ~2000.1.1 '' ~ ~ ~ 0 ~]
+++  say
+  |=  [r=room who=@t text=@t kind=@t]
+  ^-  room
+  =/  logs=(list message)  [[who text kind] chat.r]
+  r(chat (scag 80 logs))
+++  member
+  |=  [r=room who=@p]
+  ^-  ?
+  (lien players.r |=(p=player =(who who.p)))
+++  normalize
+  |=  text=@t
+  ^-  @t
+  (crip (skip (cuss (trip text)) |=(c=@tD =(c ' '))))
+++  guess-points
+  |=  previous=@ud
+  ^-  @ud
+  (sub 10 (min 5 previous))
+++  drawer-points
+  |=  [previous=@ud hints=@ud]
+  ^-  @ud
+  ?:(=(0 previous) ?:(=(hints 0) 10 (sub 6 (min hints 3))) 1)
+++  award
+  |=  [r=room solver=@p]
+  ^-  room
+  =/  previous=@ud  (lent (skim players.r |=(p=player solved.p)))
+  =/  artist=@p  who:(head players.r)
+  %=  r
+    players
+      %+  turn  players.r
+      |=  p=player
+      ?:  =(who.p solver)
+        p(score (add score.p (guess-points previous)), solved %.y)
+      ?:  =(who.p artist)
+        p(score (add score.p (drawer-points previous hints.r)))
+      p
+  ==
+++  choose
+  |=  [r=room now=@da]
+  ^-  room
+  =/  seed=@ud  (mod (mug [now token.r]) (lent words))
+  =/  opts=(list @t)
+    ~[(snag seed words) (snag (mod (add seed 31) (lent words)) words) (snag (mod (add seed 67) (lent words)) words)]
+  %+  say
+    %=  r
+      phase  %choosing
+      token  +(token.r)
+      deadline  (add now ~s15)
+      answer  ''
+      choices  opts
+      lines  ~
+      hints  0
+      revealed  ~
+      players  (turn players.r |=(p=player p(solved %.n)))
+    ==
+  ['Room' 'A new artist is choosing a word.' 'system']
+++  begin
+  |=  [r=room word=@t now=@da]
+  ^-  room
+  r(phase %drawing, answer word, choices ~, token +(token.r), deadline (add now ~s80), hints 0, revealed ~)
+++  reveal
+  |=  [r=room now=@da]
+  ^-  room
+  (say r(phase %reveal, deadline (add now ~s7), token +(token.r)) 'Room' (cat 3 'The word was: ' answer.r) 'answer')
+++  advance
+  |=  [r=room now=@da]
+  ^-  room
+  ?:  ?=(%choosing phase.r)
+    (begin r (head choices.r) now)
+  ?:  ?=(%drawing phase.r)
+    (reveal r now)
+  ?.  ?=(%reveal phase.r)  r
+  ?:  (gte +(turn.r) (mul 3 (lent players.r)))
+    (say r(phase %finished, deadline ~2000.1.1, token +(token.r)) 'Room' 'Game over! Start another game to play again.' 'system')
+  (choose r(turn +(turn.r), players (welp (slag 1 players.r) (scag 1 players.r))) now)
+--
