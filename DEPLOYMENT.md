@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.8.0
+- Version: 0.8.1
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Lobby / direct room route: `/apps/ursketch/play`
@@ -169,3 +169,26 @@ Live verification on the publisher comet passed after the native Clay import
 and Treaty publication: exact media, independent immediate audio with first-gesture
 fallback, quarter/off settings, matched background, 80% sizing, responsive intro,
 and the existing room/rejoin/tile smoke checks. Published version is 0.8.0.
+
+## 0.8.1 complete intro background repair — October 31, 2026
+
+The original logo's complete 940,0–1620,280 rectangle is replaced on every
+rendered frame by the sampled sky and reconstructed background circle. This
+replaces the incomplete letter-shaped SVG mask. The source video and selected
+urSketch PNG remain unchanged.
+
+The visible scene now uses an sRGB canvas rather than the video compositor.
+Compression noise in the two flat background blues is normalized before the
+repair, and the page uses the same sampled sky colour. This avoids differences
+between decoded canvas samples and separately composited video colours. The
+new uniform scale is .72, exactly 90% of 0.8.0's .8 scale. Controls and hit areas
+continue to track the source animation. No game state or protocol changes.
+
+Preview checks passed for rendered repair pixels (with the replacement logo
+excluded), actual screenshot pixels inside/outside all four scene corners,
+normal/fade frames, 72% size, responsive layout, and all existing intro music,
+settings, navigation and media checks.
+
+Live 0.8.1 verification passed after native Clay import and Treaty publication:
+intro pixel/geometry/audio checks and the normal room/rejoin/tile/publication
+smoke suite. JavaScript/Python syntax and whitespace checks passed.

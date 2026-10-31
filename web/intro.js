@@ -6,23 +6,38 @@
   const music=new Audio();music.preload='auto';music.loop=true;
   let prefs={},unlocked=false,pendingMusic=null,loading=null,videoUrl=null,poster=null,visualPaused=false,framePending=false,leaving=false;
   const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
-  const samples=document.createElement('canvas');samples.width=2;samples.height=1;
-  const sampleContext=samples.getContext('2d',{willReadFrequently:true});
+  // Render the decoded footage and the repaired background in one sRGB surface.
+  // A video compositor can display different blue values from drawImage samples.
+  const scene=$('intro-scene'),context=scene.getContext('2d',{alpha:false,willReadFrequently:true});
   const status=text=>$('intro-status').textContent=text;
   const themeEnabled=()=>!prefs.themeDisabled&&!prefs.muted&&prefs.volume>0;
-  function paintCover(source){
+  function paintFrame(source){
     if(!source)return;
-    try{
-      sampleContext.drawImage(source,1590,10,1,1,0,0,1,1);sampleContext.drawImage(source,738,70,1,1,1,0,1,1);
-      const c=sampleContext.getImageData(0,0,2,1).data,sky=`rgb(${c[0]},${c[1]},${c[2]})`;
-      $('intro-cover-sky').setAttribute('fill',sky);$('intro-cover-circle').setAttribute('fill',`rgb(${c[4]},${c[5]},${c[6]})`);
-      document.documentElement.style.setProperty('--intro-sky',sky);
-    }catch{}
+    context.drawImage(source,0,0,track.width,track.height);
+    const image=context.getImageData(0,0,track.width,track.height),d=image.data;
+    const at=(x,y)=>Array.from(d.slice((y*track.width+x)*4,(y*track.width+x)*4+3));
+    const sky=at(1590,10),circle=at(738,70),tolerance=Math.max(1,Math.round(8*sky[2]/224));
+    // Flatten compression noise in both solid blues. The canvas edge and page
+    // then contain identical pixels, including during the source's fade to black.
+    for(let i=0;i<d.length;i+=4){
+      let colour=null;
+      if(Math.abs(d[i]-sky[0])<=tolerance&&Math.abs(d[i+1]-sky[1])<=tolerance&&Math.abs(d[i+2]-sky[2])<=tolerance)colour=sky;
+      else if(Math.abs(d[i]-circle[0])<=tolerance&&Math.abs(d[i+1]-circle[1])<=tolerance&&Math.abs(d[i+2]-circle[2])<=tolerance)colour=circle;
+      if(colour){d[i]=colour[0];d[i+1]=colour[1];d[i+2]=colour[2];}
+    }
+    context.putImageData(image,0,0);
+    const css=c=>`rgb(${c.join(',')})`;
+    // Replace the COMPLETE original-logo rectangle, including black outlines,
+    // white interiors and codec ringing; no letter-shaped mask is involved.
+    context.save();context.beginPath();context.rect(940,0,680,280);context.clip();
+    context.fillStyle=css(sky);context.fillRect(940,0,680,280);
+    context.fillStyle=css(circle);context.beginPath();context.arc(738,532,511,0,Math.PI*2);context.fill();context.restore();
+    document.documentElement.style.setProperty('--intro-sky',css(sky));
   }
   function align(time){
     const n=Math.max(0,Math.min(track.frames.length-1,Math.floor(time*track.fps+.001))),[x,y,w,h]=track.frames[n];
     play.style.left=`${x/track.width*100}%`;play.style.top=`${y/track.height*100}%`;play.style.width=`${w/track.width*100}%`;play.style.height=`${h/track.height*100}%`;
-    paintCover(video.readyState>=2?video:poster);$('intro-wordmark').style.filter=`url(#logo-alpha-cleanup) brightness(${track.brightness[n]??1})`;
+    paintFrame(video.readyState>=2?video:poster);$('intro-wordmark').style.filter=`url(#logo-alpha-cleanup) brightness(${track.brightness[n]??1})`;
     if(!video.paused&&!visualPaused&&unlocked&&!music.paused&&Math.abs(music.currentTime-time)>.18){try{music.currentTime=time;}catch{}}
   }
   function frames(){
@@ -57,7 +72,7 @@
     return loading;
   }
   async function setVisualPaused(value){
-    visualPaused=value;if(value){video.pause();if((prefs.reduceMotion||systemMotion.matches)&&video.readyState>=1)video.currentTime=1/12;paintCover(video.readyState>=2?video:poster);return;}
+    visualPaused=value;if(value){video.pause();if((prefs.reduceMotion||systemMotion.matches)&&video.readyState>=1)video.currentTime=1/12;paintFrame(video.readyState>=2?video:poster);return;}
     await load();if(!visualPaused&&!document.hidden&&!leaving)try{if(!music.paused&&Number.isFinite(video.duration))video.currentTime=music.currentTime%video.duration;await video.play();}catch{status('Use Settings to change Reduce motion, or choose Play now.');}
   }
   function applyPrefs(next){
@@ -83,7 +98,7 @@
   window.addEventListener('pageshow',event=>{if(event.persisted){leaving=false;refreshPrefs();if(!visualPaused)void setVisualPaused(false);}});
   systemMotion.addEventListener?.('change',()=>void setVisualPaused(!!prefs.reduceMotion||systemMotion.matches));
   const image=src=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
-  Promise.all([image('URSKETCH_INTRO_POSTER_URL').then(img=>{poster=img;paintCover(img);}),image('URSKETCH_INTRO_MASK_URL'),image('URSKETCH_INTRO_WORDMARK_URL')])
+  Promise.all([image('URSKETCH_INTRO_POSTER_URL').then(img=>{poster=img;paintFrame(img);}),image('URSKETCH_INTRO_WORDMARK_URL')])
     .then(()=>document.body.classList.add('art-ready')).catch(()=>{status('Artwork unavailable. Use Play now to continue.');$('intro-fallback').hidden=false;});
   align(0);if(!visualPaused)void load();
 })();

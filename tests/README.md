@@ -91,3 +91,16 @@ checks local generated HTML against the live backend before deployment.
 
 Both the intro suite and normal comet smoke suite passed on the deployed
 0.8.0 publisher desk after publication.
+
+## 0.8.1 complete logo repair and seamless background
+
+The intro suite checks the underlying canvas independently of the replacement
+logo: all repaired pixels outside the antialiased circle edge must equal the
+sampled sky or circle colour. It also decodes actual browser screenshots and
+compares pixels inside/outside each scene corner across normal and fade frames.
+This detects video compositor colour differences that the previous CSS-versus-
+decoded-sample check missed. Geometry now expects .72 of the original size.
+
+Live 0.8.1 verification passed after native Clay import and Treaty publication:
+intro pixel/geometry/audio checks and the normal room/rejoin/tile/publication
+smoke suite. JavaScript/Python syntax and whitespace checks passed.

@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.8.0 is published from
+urSketch 0.8.1 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -184,8 +184,12 @@ song at 25% volume** applies one quarter of its normal level after master volume
 Master mute, volume, and selected audio output still apply. Reduced motion
 pauses visuals independently of music. Leaving or hiding the intro pauses audio.
 
-The animation displays at 80% of its previous size. Page and background-cleanup
-colours follow the decoded video so the surrounding blue and fade are seamless.
+The animation displays at 90% of the 0.8.0 size (72% of its original size).
+Decoded footage is rendered on one sRGB canvas, with compression noise in the
+two flat blues normalized to the sampled colours. Screenshot pixels at the
+scene boundary match the page, including fades. The entire original-logo
+rectangle is rebuilt from the blue background and circle, removing all baked
+lettering beneath the new logo.
 The selected PNG stays unchanged; rendering removes faint low-alpha halo pixels
 while preserving the opaque lettering. See `desk/media/README.md` for media
 storage/build details and `NOTICE.md` for source credits.

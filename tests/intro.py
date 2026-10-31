@@ -1,5 +1,5 @@
 """Intro fidelity, clean presentation, immediate/blocked audio, and shared settings."""
-import hashlib,json,os,re,runpy,sys,traceback,urllib.request
+import base64,hashlib,json,os,re,runpy,sys,traceback,urllib.request
 from pathlib import Path
 from playwright.sync_api import sync_playwright,expect
 sys.excepthook=lambda kind,error,tb:sys.stderr.write(''.join(line for line in traceback.format_exception(kind,error,tb) if 'cookie:' not in line.lower()))
@@ -30,7 +30,36 @@ def fit(page,width,height):
  page.set_viewport_size({'width':width,'height':height});page.wait_for_timeout(80)
  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth && document.documentElement.scrollHeight<=innerHeight')
  old=min(width-(8 if width<=600 else 16),1620,(height-(110 if width<=600 else 78))*1.5)
- assert abs(page.locator('#intro-stage').bounding_box()['width']-old*.8)<1
+ assert abs(page.locator('#intro-stage').bounding_box()['width']-old*.72)<1
+def clean_background(page):
+ # Inspect the rendered surface beneath the new logo. Away from the circle's
+ # antialiased edge, every repaired pixel must be one of the two solid blues.
+ assert page.evaluate("""()=>{
+  const c=document.querySelector('#intro-scene'),x=c.getContext('2d'),d=x.getImageData(0,0,c.width,c.height).data;
+  const pixel=(a,b)=>Array.from(d.slice((b*c.width+a)*4,(b*c.width+a)*4+3));
+  const sky=pixel(1590,10),circle=pixel(738,70);
+  for(let y=0;y<280;y++)for(let a=940;a<1620;a++){
+   const radius=Math.hypot(a+.5-738,y+.5-532);if(Math.abs(radius-511)<2)continue;
+   const expected=radius<511?circle:sky,actual=pixel(a,y);
+   if(actual.some((v,i)=>v!==expected[i]))return false;
+  }return true;
+ }""")
+ # Check screenshot pixels, rather than merely comparing CSS to decoded video.
+ # This catches differences introduced by the browser's video compositor.
+ stage=page.locator('#intro-stage').bounding_box()
+ pairs=[]
+ for right in (False,True):
+  for bottom in (False,True):
+   x=stage['x']+stage['width'] if right else stage['x']
+   y=stage['y']+stage['height'] if bottom else stage['y']
+   pairs.append([round(x+(-8 if right else 8)),round(y+(-8 if bottom else 8)),round(x+(8 if right else -8)),round(y+(-8 if bottom else 8))])
+ shot=base64.b64encode(page.screenshot()).decode()
+ assert page.evaluate("""async({shot,pairs})=>{
+  const image=new Image();image.src='data:image/png;base64,'+shot;await image.decode();
+  const c=document.createElement('canvas');c.width=image.width;c.height=image.height;
+  const x=c.getContext('2d');x.drawImage(image,0,0);
+  return pairs.every(([a,b,c,d])=>{const inside=x.getImageData(a,b,1,1).data,outside=x.getImageData(c,d,1,1).data;return inside.every((v,i)=>v===outside[i]);});
+ }""",{'shot':shot,'pairs':pairs})
 with sync_playwright() as p:
  browser=p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required']);context=browser.new_context(viewport={'width':1280,'height':900})
  denied=context.request.get(ORIGIN+'/apps/ursketch',max_redirects=0);assert denied.status==303
@@ -54,12 +83,12 @@ with sync_playwright() as p:
  page.wait_for_function("document.body.classList.contains('art-ready') && document.querySelector('video').readyState>=2",timeout=30000)
  page.locator('video').evaluate('v=>v.pause()')
  sizes=[]
- for frame in [0,24,60,96,180,300,420]:
+ for frame in [0,1,24,60,96,180,300,420,441]:
   seek(page,frame/24+.002)
   stage=page.locator('#intro-stage').bounding_box();box=page.locator('#intro-play').bounding_box();x,y,w,h=track['frames'][frame]
   assert abs((box['x']+box['width']/2-stage['x'])/stage['width']*1620-x)<3
   assert abs((box['y']+box['height']/2-stage['y'])/stage['height']*1080-y)<3
-  sizes.append(box['width'])
+  sizes.append(box['width']);clean_background(page)
  assert max(sizes)>min(sizes)*2
  seek(page,4)
  # The page's colour follows the decoded video, including fade-out colour changes.
@@ -101,4 +130,4 @@ with sync_playwright() as p:
  assert song(bp,'music.paused');assert bp.locator('.intro-controls').count()==0
  bp.mouse.click(15,300);bp.wait_for_function('!testAudios[0].paused && testAudios[0].currentTime>0',timeout=15000)
  blocked.close()
- print('PASS: exact media; audio starts before video load; quarter/off settings shared with game; blocked-autoplay interaction fallback; no bottom controls; seamless colour; 80% sizing; hit targets; reduced motion and navigation.')
+ print('PASS: exact media; audio starts before video load; quarter/off settings shared with game; blocked-autoplay interaction fallback; no bottom controls; pixel-verified seam-free background and complete original-logo removal; 72% sizing; hit targets; reduced motion and navigation.')
