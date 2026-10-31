@@ -65,3 +65,9 @@ The media suite verifies both its exact file hash and successful browser decode.
 Passed on the live Zuse 408 comet: complete intro suite with final SVG logo,
 exact media hashes, saved audio preferences on browser-history restoration,
 and existing room/rejoin/tile/favicon/publication smoke checks for 0.7.0.
+
+## 0.7.1 tile update
+
+Visually checked the centred wordmark and exact #9fc1e0 blue in the 512×512
+export. Live installed/published image equality and PNG decoding, Treaty
+0.7.1, and the existing comet smoke checks passed October 31, 2026.

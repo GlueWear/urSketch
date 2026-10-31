@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.7.0
+- Version: 0.7.1
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Lobby / direct room route: `/apps/ursketch/play`
@@ -92,3 +92,18 @@ Deployed and published 0.7.0 on the live Zuse 408 comet. The full intro suite
 passed against the final wordmark and media files, including restoring mute
 and volume after browser-history navigation. Existing live room/rejoin,
 Landscape tile, favicon, and Treaty 0.7.0 checks passed as well.
+
+## 0.7.1 app tile — October 31, 2026
+
+The Landscape tile uses the intro's urSketch wordmark centred on its exact
+light blue background (#9fc1e0). The visible lettering occupies 80% of the
+tile width. A 512×512 PNG export keeps the installed/published image compact;
+Docket's color metadata matches the same blue. The header/favicon stay unchanged.
+`python3 scripts/export_tile.py` regenerates the tile from the existing SVG
+wordmark with Playwright, without re-generating the logo. Normal builds use
+`web/tile.png`. Both the Docket file and native importer use the same image
+and the Docket color as the source of truth.
+
+Deployed and published October 31, 2026. Live checks passed for installed and
+published PNG image equality/decoding, Treaty 0.7.1, favicon, and room/rejoin
+flows. The 512×512 tile export was visually checked before deployment.

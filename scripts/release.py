@@ -12,7 +12,5 @@ VERSION = '.'.join(map(str, VERSION_PARTS))
 
 LOGO_SVG = (_docket.parents[1] / 'web/logo.svg').read_text()
 FAVICON_DATA_URL = 'data:image/svg+xml;base64,' + base64.b64encode(LOGO_SVG.encode()).decode()
-# Centre an 80% copy within the tile's 64×64 viewBox.
-TILE_LOGO_SVG = re.sub(r'(<svg\b[^>]*>)(.*)(</svg>)',
-    r'\1<g transform="translate(6.4 6.4) scale(0.8)">\2</g>\3', LOGO_SVG, flags=re.DOTALL)
-ICON_DATA_URL = 'data:image/svg+xml;base64,' + base64.b64encode(TILE_LOGO_SVG.encode()).decode()
+TILE_COLOR_HOON = re.search(r'^\s*color\+(0x[0-9a-f.]+)', _docket.read_text(), re.MULTILINE).group(1)
+ICON_DATA_URL = 'data:image/png;base64,' + base64.b64encode((_docket.parents[1] / 'web/tile.png').read_bytes()).decode()

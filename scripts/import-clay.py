@@ -8,7 +8,7 @@ import os
 import sys
 import urllib.request
 from pathlib import Path
-from release import VERSION_PARTS, ICON_DATA_URL
+from release import VERSION_PARTS, ICON_DATA_URL, TILE_COLOR_HOON
 
 ROOT = Path(__file__).resolve().parents[1] / 'desk'
 
@@ -29,7 +29,7 @@ def change(name):
     elif mark == 'docket-0':
         # Native noun for the clauses in desk/desk.docket-0.
         version_noun = ' '.join(map(str, VERSION_PARTS))
-        value = f"[%1 'urSketch' 'Draw, guess, and laugh together. Multiplayer drawing rooms hosted on Urbit ships.' 0x32.684e [%site /apps/ursketch] [~ {cord(ICON_DATA_URL)}] [{version_noun}] '' 'Unspecified']"
+        value = f"[%1 'urSketch' 'Draw, guess, and laugh together. Multiplayer drawing rooms hosted on Urbit ships.' {TILE_COLOR_HOON} [%site /apps/ursketch] [~ {cord(ICON_DATA_URL)}] [{version_noun}] '' 'Unspecified']"
     elif mark in ('mp3','mp4','jpg','png','ogg','wav','webm','svg'):
         data = path.read_bytes()
         chunks = []

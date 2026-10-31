@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.7.0 is published from
+urSketch 0.7.1 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -132,7 +132,8 @@ desk/gen/ursketch-wire.hoon  Codec, bounds, and snapshot cache checks
 desk/gen/ursketch-bandwidth.hoon Encoded-payload benchmark
 web/drawing.js             Drawing tools and deterministic command replay
 web/settings.js            Local audio, theme, and accessibility preferences
-web/logo.svg               Shared logo artwork; tile uses a centred 80% copy
+web/logo.svg               Header logo and browser favicon
+web/tile.png               Centred intro wordmark on the light blue app tile
 web/                       HTML, CSS, and JavaScript source
 scripts/                   Asset builder and dedicated-desk installer
 tests/                     Browser integration checks

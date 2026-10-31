@@ -127,7 +127,7 @@ with sync_playwright() as p:
       await api.send({action:'subscribe',ship:SELF.slice(1),app:'treaty',path:`/treaty/${SELF}/ursketch`});
     })""")
     assert treaty['title'] == 'urSketch', 'urSketch publication is missing'
-    assert treaty['image'] == icon, 'Published tile logo does not match the scaled tile artwork'
+    assert treaty['image'] == icon, 'Published tile logo does not match the tile artwork'
     for label,src in [('Tile',icon),('Browser tab',favicon)]:
         assert page.evaluate("src=>new Promise(resolve=>{const image=new Image();image.onload=()=>resolve(image.naturalWidth>0);image.onerror=()=>resolve(false);image.src=src;})",src), label+' image did not decode'
     if not preview: assert treaty['version'] == VERSION
