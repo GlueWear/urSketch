@@ -34,7 +34,7 @@ intro = (ROOT/'web/intro.html').read_text().replace('URSKETCH_FAVICON_DATA_URL',
 intro = intro.replace('/* URSKETCH_INTRO_CSS */', (ROOT/'web/intro.css').read_text())
 intro = intro.replace('/* URSKETCH_INTRO_JS */', (ROOT/'web/intro.js').read_text())
 intro = intro.replace('URSKETCH_INTRO_MOTION', (ROOT/'web/intro-motion.json').read_text().strip())
-for marker,name in [('VIDEO','video/intro.mp4'),('AUDIO','audio/music/theme_song.mp3'),('POSTER','images/intro-poster.jpg'),('MASK','images/intro-wordmark-mask.png'),('WORDMARK','images/intro-wordmark.svg')]:
+for marker,name in [('VIDEO','video/intro.mp4'),('AUDIO','audio/music/theme_song.mp3'),('POSTER','images/intro-poster.jpg'),('MASK','images/intro-wordmark-mask.png')]:
     intro = intro.replace('URSKETCH_INTRO_'+marker+'_URL', assets[name]['url'])
 (ROOT/'artifacts/media-manifest.json').write_text(json.dumps({k:{field:value for field,value in v.items() if field!='data'} for k,v in assets.items()},indent=2)+'\n')
 

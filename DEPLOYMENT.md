@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.7.1
+- Version: 0.7.2
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Lobby / direct room route: `/apps/ursketch/play`
@@ -107,3 +107,17 @@ and the Docket color as the source of truth.
 Deployed and published October 31, 2026. Live checks passed for installed and
 published PNG image equality/decoding, Treaty 0.7.1, favicon, and room/rejoin
 flows. The 512×512 tile export was visually checked before deployment.
+
+## 0.7.2 intro logo removal — October 31, 2026
+
+Temporarily removes the intro wordmark image. The original baked-in lettering
+stays covered; the cleanup samples the rendered video/poster background colours
+so it stays clean through playback and fade-out. The coverage is restricted
+to the old lettering, preserving animated artwork elsewhere in that corner.
+The tile, favicon, audio, and Play now motion are unchanged. Existing wordmark
+assets remain available for the tile and the forthcoming replacement SVG.
+
+Deployed and published 0.7.2 on October 31, 2026. Visual checks confirmed the
+logo is absent and background cleanup stays restricted to its old lettering.
+The live intro suite passed playback, media integrity, moving controls, audio,
+responsive layout, reduced motion, and navigation. Syntax/whitespace checks pass.
