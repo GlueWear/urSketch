@@ -71,3 +71,10 @@ and existing room/rejoin/tile/favicon/publication smoke checks for 0.7.0.
 Visually checked the centred wordmark and exact #9fc1e0 blue in the 512×512
 export. Live installed/published image equality and PNG decoding, Treaty
 0.7.1, and the existing comet smoke checks passed October 31, 2026.
+
+## 0.7.3 original PNG selection
+
+Verified the canonical PNG SHA-256 equals the exact owner-selected file.
+Visual checks confirmed the full original lettering in the intro and tile.
+Live intro/media hashes and normal comet room/tile/publication checks passed.
+The selection and rendering constraints are recorded in artifacts/logo-selection.json.

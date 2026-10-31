@@ -1,3 +1,13 @@
+# Current wordmark selection
+
+The owner selected the first generated PNG. The active file is
+[ursketch-logo.png](../desk/media/images/ursketch-logo.png), copied without
+modification from that supplied file. Both the intro and tile use it directly.
+No new image generation or letter editing was performed for this selection.
+See logo-selection.json for the byte-for-byte SHA-256 verification.
+
+## Historical edited variant — no longer used by intro or tile
+
 # urSketch intro wordmark
 
 Mode: built-in image_gen editing tool (transparent background).

@@ -13,6 +13,8 @@
     `['image/png' '"77dd19bbb0051d5d2db14b11fb5fe0dd6ccee980a59fcd88488758179b8700cc"' /['media']/['images']/['intro-wordmark-v2']/['png']]
   ?:  =(url '/apps/ursketch/media/f729fd4985efde0e/images/intro-wordmark.svg')
     `['image/svg+xml' '"f729fd4985efde0e5f3062a889bb3b5a0cdfdec445ca4eede08a819d215ffc55"' /['media']/['images']/['intro-wordmark']/['svg']]
+  ?:  =(url '/apps/ursketch/media/53160c12c3b4aa4d/images/ursketch-logo.png')
+    `['image/png' '"53160c12c3b4aa4df4fde063a80988197b8df290198734b918e1c45f56ac47e3"' /['media']/['images']/['ursketch-logo']/['png']]
   ?:  =(url '/apps/ursketch/media/03b6bde870e95c7c/video/intro.mp4')
     `['video/mp4' '"03b6bde870e95c7c19774f632d14fde6bb650ee33155b5fb08209c41a7979e9a"' /['media']/['video']/['intro']/['mp4']]
   ~

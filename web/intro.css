@@ -3,3 +3,5 @@
 #intro-video,#intro-logo-cover{opacity:0}body.art-ready #intro-video,body.art-ready #intro-logo-cover{opacity:1}#intro-fallback{color:#132f48;font-weight:bold;padding:7px}body.art-ready #intro-fallback{display:none}
 
 #intro-stage{overflow:hidden}
+
+#intro-wordmark{position:absolute;left:56.2962963%;top:.5555556%;width:40.4938272%;height:26.1759259%;object-fit:contain;pointer-events:none;opacity:0}body.art-ready #intro-wordmark{opacity:1}

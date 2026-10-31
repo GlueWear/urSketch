@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.7.2
+- Version: 0.7.3
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Lobby / direct room route: `/apps/ursketch/play`
@@ -121,3 +121,19 @@ Deployed and published 0.7.2 on October 31, 2026. Visual checks confirmed the
 logo is absent and background cleanup stays restricted to its old lettering.
 The live intro suite passed playback, media integrity, moving controls, audio,
 responsive layout, reduced motion, and navigation. Syntax/whitespace checks pass.
+
+## 0.7.3 selected original logo — October 31, 2026
+
+Uses the owner's selected original PNG directly in both the intro and tile.
+`media/images/ursketch-logo.png` is copied byte-for-byte from the supplied file;
+its SHA-256 match is recorded in artifacts/logo-selection.json. There are no
+glyph replacements, vector corrections, or letter clipping in either path.
+The intro renders the complete image with object-fit: contain and follows the
+source fade. The tile exporter draws the complete PNG at one uniform scale,
+centred by its visible bounds on the existing #9fc1e0 background. The original
+lettering cleanup stays underneath the separate intro image. Older edited
+variants are retained as historical assets but are not used by the intro/tile.
+
+Deployed and published 0.7.3 on October 31, 2026. Visual previews confirmed the
+selected image in both placements. Live media-integrity/intro checks and the
+installed/published tile, favicon, room/rejoin, and Treaty 0.7.3 checks passed.

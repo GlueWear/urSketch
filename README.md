@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.7.2 is published from
+urSketch 0.7.3 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -167,7 +167,7 @@ a complete cached view for additional local tabs.
 
 ## Animated introduction and audio
 
-Landscape opens the supplied animation with the logo corner temporarily cleared.
+Landscape opens the supplied animation with the selected original PNG wordmark.
 The original video stream is preserved rather than recreated. The real Play
 now target follows its button frame by frame; Instructions opens the rules.
 Play now opens the existing lobby, while direct invitations open the game.

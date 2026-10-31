@@ -19,6 +19,7 @@
     const n=Math.max(0,Math.min(track.frames.length-1,Math.floor(time*track.fps+0.001))),[x,y,w,h]=track.frames[n];
     play.style.left=`${x/track.width*100}%`;play.style.top=`${y/track.height*100}%`;play.style.width=`${w/track.width*100}%`;play.style.height=`${h/track.height*100}%`;
     paintCover(video.readyState>=2?video:poster);
+    $('intro-wordmark').style.filter=`brightness(${track.brightness[n]??1})`;
     if(unlocked&&!audio.paused&&Math.abs(audio.currentTime-time)>.18){try{audio.currentTime=time;}catch{}}
   }
   function frames(){if(framePending||video.paused||document.hidden)return;framePending=true;
@@ -57,6 +58,6 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden){wasHidden=!paused;video.pause();audio.pause();}else{refreshSound();if(wasHidden&&!paused){wasHidden=false;void setPaused(!!prefs.reduceMotion);}}});
   window.addEventListener('pagehide',event=>{video.pause();audio.pause();if(!event.persisted&&videoUrl)URL.revokeObjectURL(videoUrl);});
   window.addEventListener('pageshow',event=>{if(event.persisted){refreshSound();if(!paused)void setPaused(!!prefs.reduceMotion);}});
-  const artwork=Promise.all([new Promise((resolve,reject)=>{poster=new Image();poster.onload=()=>{paintCover(poster);resolve();};poster.onerror=reject;poster.src='URSKETCH_INTRO_POSTER_URL';}),new Promise((resolve,reject)=>{const mask=new Image();mask.onload=resolve;mask.onerror=reject;mask.src='URSKETCH_INTRO_MASK_URL';})]).then(()=>document.body.classList.add('art-ready')).catch(()=>status('Artwork unavailable. Use Play now to continue.'));
+  const artwork=Promise.all([new Promise((resolve,reject)=>{poster=new Image();poster.onload=()=>{paintCover(poster);resolve();};poster.onerror=reject;poster.src='URSKETCH_INTRO_POSTER_URL';}),new Promise((resolve,reject)=>{const mask=new Image();mask.onload=resolve;mask.onerror=reject;mask.src='URSKETCH_INTRO_MASK_URL';}),new Promise((resolve,reject)=>{const logo=new Image();logo.onload=resolve;logo.onerror=reject;logo.src='URSKETCH_INTRO_WORDMARK_URL';})]).then(()=>document.body.classList.add('art-ready')).catch(()=>status('Artwork unavailable. Use Play now to continue.'));
   align(0);controls();if(paused)status('Animation paused for reduced motion.');else void load();
 })();

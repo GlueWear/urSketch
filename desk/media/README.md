@@ -7,8 +7,11 @@ Canonical media files shipped inside the desk:
   correct_guess.mp3, turn_start.mp3, and round_end.mp3. Cue events are not
   wired yet; these are naming examples only.
 - `video/intro.mp4`: the original video stream, copied without re-encoding.
-- `images/`: intro poster, original-lettering removal mask, and the selected
-  transparent urSketch wordmark overlay.
+- `images/ursketch-logo.png`: the owner-selected, unedited canonical logo.
+  Both the intro and tile exporter use this exact PNG.
+- Other `images/` files include the poster and original-lettering removal mask.
+  Older wordmark variants are retained for historical compatibility and are not
+  used by the intro or tile.
 
 The video is the animation. Real Play now and Instructions controls sit over
 its rendered buttons. `web/intro-motion.json` stores the source-frame target
