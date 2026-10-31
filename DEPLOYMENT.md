@@ -2,9 +2,10 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.6.0
+- Version: 0.7.0
 - Runtime: Vere 4.6 / Zuse 408
-- Browser route: `/apps/ursketch`
+- Intro route: `/apps/ursketch`
+- Lobby / direct room route: `/apps/ursketch/play`
 - Source: `https://github.com/infosovereignstack/urSketch`
 
 Install on another ship:
@@ -32,7 +33,7 @@ Third-party Classic artwork provenance is in `NOTICE.md`.
 
 ## Release verification — October 31, 2026
 
-urSketch 0.6.0 is installed and publicly published on the comet. Docket and
+urSketch 0.6.0 was installed and publicly published on the comet. Docket and
 Treaty show the urSketch name, icon, route, and version. The previous app's
 listing and HTTP bindings were removed; its desk/state remain private for
 rollback. Only the urSketch game tile remains.
@@ -52,3 +53,42 @@ Audited the active source, generated bundle, served page, and mounted desk:
 no former app names remain. Third-party provenance is isolated in NOTICE.md.
 The new repository starts with the renamed source; the original repository
 retains the previous project's history and rollback material separately.
+
+## 0.7.0 intro update — October 31, 2026
+
+Landscape's existing route now opens the animated intro; Play now opens the
+lobby at `/apps/ursketch/play`. Existing root invite URLs with queries continue
+to open the app, and new invite links use the direct lobby route. Game state,
+protocol, scoring, and subscriptions are unchanged.
+
+Media files live under `desk/media/`, served after authentication. Custom
+binary marks preserve byte lengths. The generated library holds only paths,
+MIME types and hashes; it does not compile video data into Hoon source or HTML.
+The importer packs binary files in bounded chunks for native Clay imports.
+Assets have content-addressed URLs and private immutable cache headers. Eyre
+controls transfer framing; the media response deliberately omits Content-Length.
+
+The original video stream's SHA-256 is unchanged. The logo is a transparent
+urSketch edit over the original wordmark, with its replacement background
+masked to the old letters and its brightness following the source fade.
+The control hit targets use all 442 source frames. The audio is stored as
+`media/audio/music/theme_song.mp3`; `media/audio/cues/` is reserved for future
+sounds. Browser audio policy may require Enable sound. Reduced motion starts
+paused, and leaving/hiding the intro stops playback.
+
+Passed on two isolated Zuse 409 ships: native source and binary import,
+authenticated media hashes, original video decoding, dynamic hit tracking,
+audio/mute/volume, Instructions, reduced motion, phone/laptop fit, and normal
+cross-ship gameplay on the new lobby route. JavaScript/Python syntax and
+whitespace checks passed. See `tests/intro.py`, fresh intro screenshots, and
+`artifacts/intro-source-verification.json`.
+
+The final wordmark uses the selected built-in imagegen lettering with a small
+vector correction to the opening u, stored in `media/images/intro-wordmark.svg`.
+This keeps its spelling unambiguous while retaining the reference lettering.
+Native SVG media delivery and the complete intro suite also passed.
+
+Deployed and published 0.7.0 on the live Zuse 408 comet. The full intro suite
+passed against the final wordmark and media files, including restoring mute
+and volume after browser-history navigation. Existing live room/rejoin,
+Landscape tile, favicon, and Treaty 0.7.0 checks passed as well.

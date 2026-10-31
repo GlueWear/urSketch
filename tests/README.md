@@ -42,3 +42,26 @@ measure payload bytes, not end-to-end network latency.
 
 Fresh screenshots and public metadata are under artifacts/. No credentials
 or real ship session cookies are saved.
+
+## 0.7.0 intro verification
+
+`intro.py` checks the actual ship routes and requires no saved credentials.
+Default test URLs are HTTP 18080 and Lens 12322. Set URSKETCH_ORIGIN and
+URSKETCH_LENS_URL to check another ship. It verifies authentication, every
+asset's SHA-256 and byte length, MIME/cache headers, missing media 404,
+actual video playback, frame-matched button targets including edge-on/fade
+states, sound/mute/volume persistence, Instructions, reduced motion, mobile
+fit, and navigation into the existing lobby.
+
+Native binary import and intro checks passed on both isolated ships. Existing
+browser.py multiplayer checks passed with both clients using the new direct
+lobby route. The source/shipped video stream hash comparison confirms that
+animation packets are identical. The selected wordmark and built-in imagegen
+prompt are recorded in artifacts/intro-wordmark-prompt.md.
+
+The final SVG wordmark was checked in the actual intro on the isolated ship.
+The media suite verifies both its exact file hash and successful browser decode.
+
+Passed on the live Zuse 408 comet: complete intro suite with final SVG logo,
+exact media hashes, saved audio preferences on browser-history restoration,
+and existing room/rejoin/tile/favicon/publication smoke checks for 0.7.0.

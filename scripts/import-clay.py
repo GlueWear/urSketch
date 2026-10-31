@@ -4,6 +4,7 @@
 --batch commits related files together, so clients never see half an update.
 """
 import json
+import os
 import sys
 import urllib.request
 from pathlib import Path
@@ -20,7 +21,7 @@ def change(name):
     path = ROOT / name
     mark = path.suffix[1:]
     parts = path.relative_to(ROOT).with_suffix('').parts
-    destination = '/=ursketch=/' + '/'.join(parts) + '/' + mark
+    destination = '/=ursketch=/' + '/'.join("['"+part+"']" if '_' in part else part for part in parts) + '/' + mark
     if remove:
         return f'(fray:space:userlib {destination})'
     if mark == 'hoon':
@@ -29,6 +30,17 @@ def change(name):
         # Native noun for the clauses in desk/desk.docket-0.
         version_noun = ' '.join(map(str, VERSION_PARTS))
         value = f"[%1 'urSketch' 'Draw, guess, and laugh together. Multiplayer drawing rooms hosted on Urbit ships.' 0x32.684e [%site /apps/ursketch] [~ {cord(ICON_DATA_URL)}] [{version_noun}] '' 'Unspecified']"
+    elif mark in ('mp3','mp4','jpg','png','ogg','wav','webm','svg'):
+        data = path.read_bytes()
+        chunks = []
+        for start in range(0,len(data),512):
+            chunk = data[start:start+512]
+            number = chunk[::-1].hex().lstrip('0') or '0'
+            first = len(number)%4 or 4
+            number = number[:first]+''.join('.'+number[i:i+4] for i in range(first,len(number),4))
+            chunks.append(f'[{len(chunk)} 0x{number}]')
+        length = format(len(data),',').replace(',','.')
+        value = f"[{length} (can 3 ~[{' '.join(chunks)}])]"
     else:
         value = path.read_text().strip()
     return f'(foal:space:userlib {destination} [%{mark} !>({value})])'
@@ -40,9 +52,9 @@ def send(names):
         combined = f'(furl:space:userlib {item} {combined})'
     command = f'+hood/pass [%c %info {combined}]'
     payload = {'source': {'dojo': command}, 'sink': {'app': 'hood'}}
-    request = urllib.request.Request('http://127.0.0.1:12321',
+    request = urllib.request.Request(os.environ.get('URSKETCH_LENS_URL','http://127.0.0.1:12321'),
         data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json'})
-    with urllib.request.urlopen(request, timeout=90) as response:
+    with urllib.request.urlopen(request, timeout=180) as response:
         result = json.load(response)
     print(', '.join(names) + ': ' + str(result).strip(), flush=True)
     if str(result).strip() != '>=':

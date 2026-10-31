@@ -29,7 +29,7 @@ with sync_playwright() as p:
     page.on('pageerror', lambda e: errors.append(str(e)))
     preview = os.environ.get('URSKETCH_PREVIEW') == '1'
     if preview:
-        current = context.request.get('http://127.0.0.1/apps/ursketch').text()
+        current = context.request.get('http://127.0.0.1/apps/ursketch/play').text()
         ship_name = re.search(r"window.URSKETCH_SHIP='([^']+)'", current).group(1)
         root = Path(__file__).resolve().parents[1]
         html = (root/'web/index.html').read_text().replace('URSKETCH_APP_VERSION', VERSION).replace('<!-- URSKETCH_LOGO -->', (root/'web/logo.svg').read_text()).replace('URSKETCH_FAVICON_DATA_URL', RELEASE['FAVICON_DATA_URL'])
@@ -46,8 +46,8 @@ with sync_playwright() as p:
                     source=source.replace('DEFAULT_HINT_'+asset.upper()+'_IMAGE','data:image/svg+xml;base64,'+base64.b64encode((root/f'web/hint-{asset}.svg').read_bytes()).decode())
             html = html.replace('/* '+marker+' */',source)
         html = html.replace('<script>','<script>window.URSKETCH_SHIP='+json.dumps(ship_name)+';',1)
-        page.route('**/apps/ursketch',lambda route:route.fulfill(status=200,content_type='text/html',body=html))
-    response = page.goto('http://127.0.0.1/apps/ursketch')
+        page.route('**/apps/ursketch/play',lambda route:route.fulfill(status=200,content_type='text/html',body=html))
+    response = page.goto('http://127.0.0.1/apps/ursketch/play')
     assert response.status == 200
     favicon=page.locator('link[rel="icon"]').get_attribute('href')
     assert favicon == RELEASE['FAVICON_DATA_URL'], 'Browser tab logo is missing'
@@ -94,7 +94,7 @@ with sync_playwright() as p:
     expect(page.locator('#player-count')).to_have_text('1/12')
     page.screenshot(path=str(artifacts / 'comet-room.png'), full_page=True)
     room = page.evaluate('roomId')
-    page.goto('http://127.0.0.1/apps/ursketch')
+    page.goto('http://127.0.0.1/apps/ursketch/play')
     expect(page.locator('#room-recovery')).to_be_visible(timeout=30000)
     expect(page.locator('#rejoin-room')).to_be_enabled(timeout=30000)
     page.locator('#rejoin-room').click()
@@ -102,8 +102,8 @@ with sync_playwright() as p:
     assert page.evaluate('roomId') == room
     # Both compact invite codes and existing copied invite URLs use Search.
     ship = page.evaluate('SELF')
-    for invite in [f'{ship}/{room}',f'http://127.0.0.1/apps/ursketch?host={ship}&room={room}']:
-        page.goto('http://127.0.0.1/apps/ursketch')
+    for invite in [f'{ship}/{room}',f'http://127.0.0.1/apps/ursketch/play?host={ship}&room={room}']:
+        page.goto('http://127.0.0.1/apps/ursketch/play')
         expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
         page.locator('#search-invite-mode').click()
         page.locator('#host').fill(invite)

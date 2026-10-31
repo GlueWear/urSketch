@@ -1,0 +1,11 @@
+{
+  "video_stream_sha256": "19f2217e98f7611ed576bebafbf2c626463a1c4c2c0b52100e3111512a8e4802",
+  "original_video_packets_preserved": true,
+  "video_frames": 442,
+  "video_fps": 24,
+  "video_seconds": 18.416666666666668,
+  "music_file": "desk/media/audio/music/theme_song.mp3",
+  "music_source": "audio track from the supplied reference video",
+  "animation_recreated": false,
+  "logo_edit": "urSketch wordmark overlay; original video stream unchanged"
+}

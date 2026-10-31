@@ -1,4 +1,4 @@
-/+  *ursketch-types, ursketch-game, ursketch-assets, ursketch-wire
+/+  *ursketch-types, ursketch-game, ursketch-assets, ursketch-wire, ursketch-media
 |%
 +$  card  card:agent:gall
 +$  state-0  [%0 rooms=(map @t old-room)]
@@ -87,12 +87,22 @@
   ?+  mark  ~|('unsupported mark' !!)
     %handle-http-request
       =/  req  !<([id=@ta req=inbound-request:eyre] vase)
-      =/  mime=@t  'text/html; charset=utf-8'
-      =/  body=@t  (index:ursketch-assets our.bowl)
-      =/  code=@ud  200
       ?.  authenticated.req.req
         (respond id.req 303 'text/plain' 'Log into your ship first.')
-      (respond id.req code mime body)
+      =/  asset  (lookup:ursketch-media url.request.req.req)
+      ?^  asset
+        =/  location=path
+          (weld /[(scot %p our.bowl)]/ursketch/[(scot %da now.bowl)] file.u.asset)
+        =/  data=octs  .^(octs %cx location)
+        (respond-media id.req mime.u.asset etag.u.asset data)
+      ?:  =((cut 3 [0 21] url.request.req.req) '/apps/ursketch/media/')
+        (respond id.req 404 'text/plain' 'Media not found.')
+      ?:  ?|
+            =(url.request.req.req '/apps/ursketch')
+            =(url.request.req.req '/apps/ursketch/')
+          ==
+        (respond id.req 200 'text/html; charset=utf-8' intro:ursketch-assets)
+      (respond id.req 200 'text/html; charset=utf-8' (index:ursketch-assets our.bowl))
     %json
       =/  j=json  !<(json vase)
       ?>  ?=(%o -.j)
@@ -379,6 +389,21 @@
   :_  state
   :~  [%give %fact ~[/http-response/[id]] %http-response-header !>([code headers])]
       [%give %fact ~[/http-response/[id]] %http-response-data !>(`[(met 3 body) body])]
+      [%give %kick ~[/http-response/[id]] ~]
+  ==
+++  respond-media
+  |=  [id=@ta mime=@t etag=@t body=octs]
+  ^-  (quip card state-4)
+  =/  headers=(list [@t @t])
+    :~  ['Content-Type' mime]
+        ['Cache-Control' 'private, max-age=31536000, immutable']
+        ['ETag' etag]
+        ['Accept-Ranges' 'none']
+        ['X-Content-Type-Options' 'nosniff']
+    ==
+  :_  state
+  :~  [%give %fact ~[/http-response/[id]] %http-response-header !>([200 headers])]
+      [%give %fact ~[/http-response/[id]] %http-response-data !>(`body)]
       [%give %kick ~[/http-response/[id]] ~]
   ==
 ++  obj

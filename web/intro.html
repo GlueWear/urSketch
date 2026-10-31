@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>urSketch · Play now</title><link rel="icon" type="image/svg+xml" sizes="any" href="URSKETCH_FAVICON_DATA_URL"><style>/* URSKETCH_INTRO_CSS */</style></head>
+<body>
+<main aria-label="urSketch introduction">
+  <div id="intro-stage">
+    <video id="intro-video" muted playsinline loop preload="none" poster="URSKETCH_INTRO_POSTER_URL" aria-hidden="true"></video>
+    <svg id="intro-wordmark" viewBox="900 0 720 280" role="img" aria-label="urSketch">
+      <defs>
+        <filter id="letter-mask"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  8 0 -8 0 1"/><feMorphology operator="dilate" radius="2"/></filter>
+        <mask id="old-lettering" maskUnits="userSpaceOnUse" x="900" y="0" width="720" height="280"><image href="URSKETCH_INTRO_MASK_URL" x="950" y="0" width="650" height="280" filter="url(#letter-mask)"/></mask>
+      </defs>
+      <g mask="url(#old-lettering)"><rect x="900" y="0" width="720" height="280" fill="rgb(159,193,224)"/><circle cx="738" cy="532" r="511" fill="rgb(45,100,154)"/></g>
+      <image href="URSKETCH_INTRO_WORDMARK_URL" x="912" y="6" width="656" height="282.7"/>
+    </svg>
+    <a id="intro-play" class="movie-target" href="/apps/ursketch/play" aria-label="Play now"><span class="sr-only">Play now</span></a>
+    <button id="intro-instructions" class="movie-target" aria-label="Instructions"><span class="sr-only">Instructions</span></button>
+  </div>
+  <div class="intro-controls" aria-label="Animation and sound controls">
+    <a id="intro-fallback" href="/apps/ursketch/play">Play now →</a>
+    <button id="intro-motion" aria-label="Pause animation">Pause animation</button>
+    <button id="intro-sound" aria-pressed="false">Enable sound</button>
+    <label for="intro-volume">Volume <input id="intro-volume" type="range" min="0" max="100" step="1" value="70"></label>
+    <span id="intro-status" role="status" aria-live="polite">Loading animation…</span>
+  </div>
+</main>
+<dialog id="intro-help"><h1>How to play</h1><p>Choose Play now to create a room or search a friend's ship. Each player plays through their own ship.</p><p>Take turns choosing a secret word and drawing it in 80 seconds. Guess the artist's word in Game; use Chat to talk. No letters or numbers in the drawing.</p><p>Correct guesses earn 10, 9, 8, 7, 6, then 5 points each. The artist earns 10 points for the first correct guess, plus one for each additional guesser.</p><p>Give hint can be used three times before the first correct guess. It shows the letter count, then reveals one random letter per press. The artist's initial reward becomes 5, 4, then 3 points. With no correct guesses, the artist earns no points.</p><p>Drawing shortcuts: Pen P, Brush B, Spray Y, Eraser E, Rectangle S, Circle C, Line L, Zoom Z. +/− zoom; double-click Zoom to reset; Space pans.</p><form method="dialog"><button>Back to intro</button></form></dialog>
+<noscript><p>JavaScript is needed to play urSketch. <a href="/apps/ursketch/play">Open the lobby</a>.</p></noscript>
+<script>/* URSKETCH_INTRO_JS */</script>
+</body></html>

@@ -16,6 +16,8 @@ for folder in ('app', 'lib', 'gen', 'mar', 'sur'):
         destination = target / folder / file.name
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(file, destination)
+if (source/'media').exists():
+    shutil.copytree(source/'media',target/'media',dirs_exist_ok=True)
 shutil.copy2(source / 'desk.bill', target / 'desk.bill')
 for name in ('desk.docket-0', 'desk.ship'):
     if (source / name).exists():

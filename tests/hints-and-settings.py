@@ -10,7 +10,7 @@ with sync_playwright() as p:
     pages=[];errors=[]
     for context,origin,code in zip(contexts,['http://127.0.0.1:18080','http://127.0.0.1:18081'],[codes['host'],codes['guest']]):
         assert context.request.post(origin+'/~/login',form={'password':code}).ok
-        page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.goto(origin+'/apps/ursketch');expect(page.locator('#host-search')).to_be_enabled(timeout=30000);pages.append(page)
+        page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.goto(origin+'/apps/ursketch/play');expect(page.locator('#host-search')).to_be_enabled(timeout=30000);pages.append(page)
     h,g=pages
     h.locator('#create-open').click();h.locator('#title').fill(f'Hints {time.time_ns()}');h.locator('#create-form button.primary').click();expect(h.locator('#game')).to_be_visible(timeout=30000)
     room=h.evaluate('roomId');g.locator('#search-invite-mode').click();g.locator('#host').fill(f'~zod/{room}');g.locator('#host-search').click();expect(g.locator('#game')).to_be_visible(timeout=30000)

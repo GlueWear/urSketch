@@ -20,7 +20,7 @@ with sync_playwright() as p:
         assert context.request.post(origin+'/~/login',form={'password':codes[ship]}).ok
         page = context.new_page()
         page.on('pageerror',lambda error:errors.append(str(error)))
-        page.goto(origin+'/apps/ursketch')
+        page.goto(origin+'/apps/ursketch/play')
         expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
         pages.append(page)
     h = pages[0]
@@ -36,14 +36,14 @@ with sync_playwright() as p:
         expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
         # Exercise invite entry through the shared search box.
         page.locator('#search-invite-mode').click()
-        page.locator('#host').fill(f'http://127.0.0.1:18080/apps/ursketch?host=~zod&room={room}')
+        page.locator('#host').fill(f'http://127.0.0.1:18080/apps/ursketch/play?host=~zod&room={room}')
         page.locator('#host-search').click()
         expect(page.locator('#game')).to_be_visible(timeout=30000)
         for active in pages[:index]:expect(active.locator('#player-count')).to_have_text(f'{index}/12',timeout=30000)
         print(f'{index} distinct ships joined; all prior players remain.',flush=True)
     # An abandoned lobby tab must never leave an active room in another tab.
     stale=contexts[-1].new_page()
-    stale.goto('http://127.0.0.1:18083/apps/ursketch')
+    stale.goto('http://127.0.0.1:18083/apps/ursketch/play')
     expect(stale.locator('#host-search')).to_be_enabled(timeout=30000)
     expect(stale.locator('#room-recovery')).to_be_visible()
     stale.evaluate('saveRecovery({...savedRoom,expiresAt:Date.now()-1})')

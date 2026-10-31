@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.6.0 is published from
+urSketch 0.7.0 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -16,7 +16,8 @@ On another ship, run:
 ```
 
 You can also browse that ship in Landscape’s app discovery and select urSketch.
-After installation, open its tile or `/apps/ursketch` on your own ship. The
+After installation, open its tile or `/apps/ursketch` for the animated intro.
+Choose **Play now** to enter the lobby at `/apps/ursketch/play`. The
 publisher must be online for a new ship to download the desk and updates.
 The published desk currently targets Zuse 408.
 
@@ -49,7 +50,8 @@ The installer preserves the runtime version and standard mark files created by
 
 To update source later, rerun the two Python commands and `|commit %ursketch`.
 
-The desk and agent are both `%ursketch`; the browser route is `/apps/ursketch`.
+The desk and agent are both `%ursketch`. `/apps/ursketch` is the animated intro;
+`/apps/ursketch/play` opens the lobby directly.
 Install this desk on every participating ship. Existing rooms and browser
 preferences from another app are separate; create new rooms and invitations.
 
@@ -64,7 +66,7 @@ preferences from another app are separate; create new rooms and invitations.
 - The game fits laptop viewports; the players and game log are on the left,
   conversation is below, and the canvas is on the right. The timer uses a grey dial that turns red for the final 20 seconds.
 - Create a room on your own ship. It supports 2–12 players.
-- Friends install urSketch on their ships, open their own `/apps/ursketch`, and
+- Friends install urSketch on their ships, open their own `/apps/ursketch/play`, and
   enter your ship in **Browse a host ship**. Search and join each show progress until the host responds.
 - Invite URLs carry `host` and `room`. Friends paste the copied URL into
   **Room invite code** on their own ship. No one needs to log into another
@@ -161,3 +163,17 @@ chat, guesses, scores, and other room metadata do not resend drawing history.
 Joining, reload, and recovery use complete snapshots. Missing deltas trigger
 an automatic snapshot request; duplicates are ignored. Proxy ships maintain
 a complete cached view for additional local tabs.
+
+## Animated introduction and audio
+
+Landscape opens the supplied animation, with a urSketch wordmark overlay.
+The original video stream is preserved rather than recreated. The real Play
+now target follows its button frame by frame; Instructions opens the rules.
+Play now opens the existing lobby, while direct invitations open the game.
+
+The music is `desk/media/audio/music/theme_song.mp3`. Future cue files belong
+in `desk/media/audio/cues/`; game cue events are not wired yet. Music uses
+saved volume, mute, and output preferences. Browsers that block audible
+autoplay show **Enable sound**. Animation/music can be paused; reduced-motion
+preferences start the page with a still poster. Leaving the intro stops audio.
+See `desk/media/README.md` for storage/build details and `NOTICE.md` for credits.

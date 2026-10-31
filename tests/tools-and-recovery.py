@@ -47,7 +47,7 @@ with sync_playwright() as p:
     h,g=[context.new_page() for context in contexts]
     errors=[]
     for page in (h,g):page.on('pageerror',lambda e:errors.append(str(e)))
-    h.goto(HOST+'/apps/ursketch');g.goto(GUEST+'/apps/ursketch')
+    h.goto(HOST+'/apps/ursketch/play');g.goto(GUEST+'/apps/ursketch/play')
     for page in (h,g):expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
     expect(g.locator('#host-search')).to_have_text('Search →')
     assert 'Draw a little closer.' not in h.locator('body').inner_text()
@@ -143,7 +143,7 @@ with sync_playwright() as p:
     g.locator('#leave').click();expect(g.locator('#lobby')).to_be_visible()
     h.locator('#leave').click();expect(h.locator('#lobby')).to_be_visible()
     h.locator('#create-open').click();h.locator('#title').fill('Expiry probe');h.locator('#create-form button.primary').click();expect(h.locator('#game')).to_be_visible()
-    h.goto(HOST+'/apps/ursketch');expect(h.locator('#room-recovery')).to_be_visible()
+    h.goto(HOST+'/apps/ursketch/play');expect(h.locator('#room-recovery')).to_be_visible()
     expect(h.locator('#room-list')).to_contain_text('Expiry probe')
     h.evaluate('localStorage.removeItem(recoveryKey);savedRoom=null;renderRecovery()')
     print('Tools, progress, timer, replay, and refresh/rejoin passed. Waiting for host-side two-minute expiry…',flush=True)

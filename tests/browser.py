@@ -18,7 +18,7 @@ with sync_playwright() as p:
     browser = p.chromium.launch()
     first = browser.new_context(viewport={'width': 1440, 'height': 1000})
     second = browser.new_context(viewport={'width': 1440, 'height': 1000})
-    anonymous = first.request.get(HOST + '/apps/ursketch', max_redirects=0)
+    anonymous = first.request.get(HOST + '/apps/ursketch/play', max_redirects=0)
     assert anonymous.status == 303
     assert anonymous.headers['location'] == '/~/login?redirect=/apps/ursketch'
     for context, origin, code in ((first, HOST, codes['host']), (second, GUEST, codes['guest'])):
@@ -31,7 +31,7 @@ with sync_playwright() as p:
         page.add_init_script("""window.urSketchEvents=[]; const ES=window.EventSource;
           window.EventSource=class extends ES {constructor(...args){super(...args);
             this.addEventListener('message',e=>window.urSketchEvents.push(JSON.parse(e.data)));}};""")
-    host.goto(HOST + '/apps/ursketch')
+    host.goto(HOST + '/apps/ursketch/play')
     expect(host.locator('#status')).to_contain_text('Connected as', timeout=30000)
     host.screenshot(path=str(ARTIFACTS / 'lobby.png'), full_page=True)
     host.locator('#player-name').fill('Alice')
@@ -43,13 +43,13 @@ with sync_playwright() as p:
     expect(host.locator('#game')).to_be_visible(timeout=30000)
     room = host.evaluate('roomId')
     host_ship = host.evaluate('SELF')
-    guest.goto(GUEST + '/apps/ursketch')
+    guest.goto(GUEST + '/apps/ursketch/play')
     expect(guest.locator('#status')).to_contain_text('Connected as', timeout=30000)
     guest.locator('#player-name').fill('Bob')
     guest.locator('#profile-form button').click()
     expect(guest.locator('#profile-current')).to_have_text('Playing as Bob')
     guest.locator('#search-invite-mode').click()
-    guest.locator('#host').fill(HOST + f'/apps/ursketch?host={host_ship}&room={room}')
+    guest.locator('#host').fill(HOST + f'/apps/ursketch/play?host={host_ship}&room={room}')
     guest.locator('#host-search').click()
     expect(guest.locator('#game')).to_be_visible(timeout=60000)
     try:

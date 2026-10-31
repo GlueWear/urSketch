@@ -23,7 +23,7 @@ with sync_playwright() as p:
     for ctx_,origin,code in zip(contexts,[H,G],[codes['host'],codes['guest']]):
         assert ctx_.request.post(origin+'/~/login',form={'password':code}).ok
         ctx_.add_init_script("""window.wireEvents=[];const Original=EventSource;window.EventSource=class extends Original{constructor(...args){super(...args);this.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.response==='diff')window.wireEvents.push(m.json);});}};""")
-        page=ctx_.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.goto(origin+'/apps/ursketch')
+        page=ctx_.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.goto(origin+'/apps/ursketch/play')
         expect(page.locator('#host-search')).to_be_enabled(timeout=30000);pages.append(page)
     h,g=pages
     h.locator('#create-open').click();h.locator('#title').fill(f'Vector load {time.time_ns()}');h.locator('#create-form button.primary').click()
@@ -66,7 +66,7 @@ with sync_playwright() as p:
     assert g.evaluate("droppedPatch && wireEvents.some(e=>e.kind==='room'&&e.count===1680)")
     same_board(h,g)
     # A new local browser gets a complete snapshot from the existing remote proxy.
-    extra=contexts[1].new_page();extra.goto(G+f'/apps/ursketch?host=~zod&room={room}')
+    extra=contexts[1].new_page();extra.goto(G+f'/apps/ursketch/play?host=~zod&room={room}')
     expect(extra.locator('#game')).to_be_visible(timeout=30000);extra.wait_for_function('state.lines.length===1680')
     same_board(h,extra);extra.evaluate('api.unsubscribe(roomSub)');extra.close()
     # Reload also rebuilds all commands and preserves the private view.
@@ -76,7 +76,7 @@ with sync_playwright() as p:
     legacy_context=browser.new_context(viewport={'width':1280,'height':720})
     assert legacy_context.request.post(G+'/~/login',form={'password':codes['guest']}).ok
     legacy=legacy_context.new_page()
-    legacy.goto(G+'/apps/ursketch');expect(legacy.locator('#host-search')).to_be_enabled(timeout=30000)
+    legacy.goto(G+'/apps/ursketch/play');expect(legacy.locator('#host-search')).to_be_enabled(timeout=30000)
     legacy.evaluate("""()=>{const subscribe=api.subscribe.bind(api);api.subscribe=(path,...args)=>path.startsWith('/stream/')?Promise.reject(new Error('The host could not open that room or room list.')):subscribe(path,...args);}""")
     legacy.locator('#search-invite-mode').click();legacy.locator('#host').fill(f'~zod/{room}');legacy.locator('#host-search').click()
     expect(legacy.locator('#game')).to_be_visible(timeout=30000)
@@ -95,7 +95,7 @@ with sync_playwright() as p:
     for page in [h,g,legacy]:page.wait_for_function('state.lines.length===11')
     same_board(h,g);same_board(h,legacy)
     # New clients fall back cleanly when a host rejects the stream subscription.
-    fallback=contexts[1].new_page();fallback.goto(G+'/apps/ursketch');expect(fallback.locator('#host-search')).to_be_enabled(timeout=30000)
+    fallback=contexts[1].new_page();fallback.goto(G+'/apps/ursketch/play');expect(fallback.locator('#host-search')).to_be_enabled(timeout=30000)
     fallback.evaluate("""()=>{const subscribe=api.subscribe.bind(api);api.subscribe=(path,...args)=>path.startsWith('/stream/')?Promise.reject(new Error('The host could not open that room or room list.')):subscribe(path,...args);}""")
     fallback.locator('#search-invite-mode').click();fallback.locator('#host').fill(f'~zod/{room}');fallback.locator('#host-search').click()
     expect(fallback.locator('#game')).to_be_visible(timeout=30000);assert not fallback.evaluate('roomStream');same_board(h,fallback)
