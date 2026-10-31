@@ -3,6 +3,7 @@
 from pathlib import Path
 import base64
 import json
+import re
 from media_assets import media_assets, write_media
 from release import VERSION, LOGO_SVG, ICON_DATA_URL, FAVICON_DATA_URL
 
@@ -31,6 +32,8 @@ html = html.replace('/* URSKETCH_JS */', (ROOT / 'web/app.js').read_text())
 html = html.replace('<script>', '<script>window.URSKETCH_SHIP=URSKETCH_SHIP_VALUE;', 1)
 before, after = html.split('URSKETCH_SHIP_VALUE', 1)
 intro = (ROOT/'web/intro.html').read_text().replace('URSKETCH_FAVICON_DATA_URL', FAVICON_DATA_URL)
+settings_dialog = re.search(r'<dialog id="settings-dialog".*?</dialog>', html, re.DOTALL).group()
+intro = intro.replace('<!-- URSKETCH_SETTINGS_DIALOG -->', settings_dialog).replace('/* URSKETCH_SETTINGS */', (ROOT/'web/settings.js').read_text())
 intro = intro.replace('/* URSKETCH_INTRO_CSS */', (ROOT/'web/intro.css').read_text())
 intro = intro.replace('/* URSKETCH_INTRO_JS */', (ROOT/'web/intro.js').read_text())
 intro = intro.replace('URSKETCH_INTRO_MOTION', (ROOT/'web/intro-motion.json').read_text().strip())

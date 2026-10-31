@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.7.3 is published from
+urSketch 0.8.0 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -173,8 +173,19 @@ now target follows its button frame by frame; Instructions opens the rules.
 Play now opens the existing lobby, while direct invitations open the game.
 
 The music is `desk/media/audio/music/theme_song.mp3`. Future cue files belong
-in `desk/media/audio/cues/`; game cue events are not wired yet. Music uses
-saved volume, mute, and output preferences. Browsers that block audible
-autoplay show **Enable sound**. Animation/music can be paused; reduced-motion
-preferences start the page with a still poster. Leaving the intro stops audio.
-See `desk/media/README.md` for storage/build details and `NOTICE.md` for credits.
+in `desk/media/audio/cues/`; game cue events are not wired yet. The theme starts
+immediately without waiting for video loading, subject to browser autoplay
+permissions and saved mute preferences. If autoplay is blocked, the first real
+click or key retries it; there is no bottom control bar.
+
+The intro's top-right gear opens the same Settings menu as the game. **Theme
+song at 25% volume** applies one quarter of its normal level after master volume;
+**Disable theme song** stops only the music. Both are saved in this browser.
+Master mute, volume, and selected audio output still apply. Reduced motion
+pauses visuals independently of music. Leaving or hiding the intro pauses audio.
+
+The animation displays at 80% of its previous size. Page and background-cleanup
+colours follow the decoded video so the surrounding blue and fade are seamless.
+The selected PNG stays unchanged; rendering removes faint low-alpha halo pixels
+while preserving the opaque lettering. See `desk/media/README.md` for media
+storage/build details and `NOTICE.md` for source credits.

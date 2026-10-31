@@ -78,3 +78,16 @@ Verified the canonical PNG SHA-256 equals the exact owner-selected file.
 Visual checks confirmed the full original lettering in the intro and tile.
 Live intro/media hashes and normal comet room/tile/publication checks passed.
 The selection and rendering constraints are recorded in artifacts/logo-selection.json.
+
+## 0.8.0 clean intro and theme settings
+
+The intro suite runs an allowed-autoplay browser and a browser with an initial
+audio denial. It holds the video request to prove music starts independently,
+then checks first-gesture retry, disabled-song network suppression, quarter/off
+settings shared with the game, history restoration, exact 80% scene dimensions,
+decoded-video/background colour equality, no bottom controls, phone settings,
+reduced motion, target tracking, and entry into the lobby. `URSKETCH_PREVIEW=1`
+checks local generated HTML against the live backend before deployment.
+
+Both the intro suite and normal comet smoke suite passed on the deployed
+0.8.0 publisher desk after publication.

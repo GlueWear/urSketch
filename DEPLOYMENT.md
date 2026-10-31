@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.7.3
+- Version: 0.8.0
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Lobby / direct room route: `/apps/ursketch/play`
@@ -137,3 +137,35 @@ variants are retained as historical assets but are not used by the intro/tile.
 Deployed and published 0.7.3 on October 31, 2026. Visual previews confirmed the
 selected image in both placements. Live media-integrity/intro checks and the
 installed/published tile, favicon, room/rejoin, and Treaty 0.7.3 checks passed.
+
+## 0.8.0 intro presentation and music — October 31, 2026
+
+Removes the bottom controls and adds an intro Settings gear using the exact
+same dialog/source and preference reader as the game. `themeQuiet` applies a
+0.25 music gain after master volume; `themeDisabled` stops theme music without
+affecting game/test sounds. Old saved settings default both options to false.
+Changes apply immediately and survive navigation/history restoration. The
+settings dialog also fits narrow phone screens in the normal lobby/game.
+
+Music attempts playback immediately, independently of the video download.
+Browser-denied autoplay retries synchronously on a real pointer/key gesture.
+No artificial interaction or browser-policy bypass is used. Saved master mute
+and audio output are respected; disabled music is not fetched automatically.
+Reduced motion pauses visuals independently, and returning from instructions
+aligns video to the continuing music instead of restarting the song.
+
+The scene is uniformly scaled by 0.8. Its page background follows sampled
+video/poster colours, including fades. Original-letter cleanup coverage is
+expanded and a render-only alpha filter suppresses faint halo pixels while
+leaving the canonical PNG unchanged and preserving opaque letter artwork.
+
+Preview checks passed for exact media, music starting before held video
+requests, quarter/off preferences across intro and game, disabled-music network
+suppression, autoplay fallback, colour matching, 80% geometry, responsive
+layout, moving controls, reduced motion, navigation, and normal room/rejoin.
+JavaScript/Python syntax and whitespace checks passed.
+
+Live verification on the publisher comet passed after the native Clay import
+and Treaty publication: exact media, independent immediate audio with first-gesture
+fallback, quarter/off settings, matched background, 80% sizing, responsive intro,
+and the existing room/rejoin/tile smoke checks. Published version is 0.8.0.

@@ -53,3 +53,5 @@ body:not([data-theme=classic]) #round-controls button:hover:not(:disabled){filte
 body:not([data-theme=classic]) #round-controls button:active:not(:disabled){filter:brightness(.9)}
 body:not([data-theme=classic]) #round-controls #give-hint:disabled{filter:grayscale(1);opacity:.7}
 body:not([data-theme=classic]) #hints-used{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+#settings-dialog{max-width:calc(100vw - 30px)}

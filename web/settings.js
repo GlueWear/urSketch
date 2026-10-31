@@ -1,14 +1,18 @@
 /* Browser-local preferences and the audio output used by future game sounds. */
 function createSettings({notify,onChange}) {
   const $=id=>document.getElementById(id),key='ursketch.settings.v1';
-  const defaults={theme:'default',volume:70,muted:false,output:'',reduceMotion:false,largeChat:false};
-  let prefs={...defaults};
-  try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved){
-    prefs.theme=['default','classic'].includes(saved.theme)?saved.theme:'default';
-    prefs.volume=Number.isFinite(saved.volume)?Math.max(0,Math.min(100,saved.volume)):70;
-    for(const name of ['muted','reduceMotion','largeChat'])prefs[name]=saved[name]===true;
-    prefs.output=typeof saved.output==='string'?saved.output:'';
-  }}catch{}
+  const defaults={theme:'default',volume:70,muted:false,output:'',reduceMotion:false,largeChat:false,themeQuiet:false,themeDisabled:false};
+  function readPrefs(){
+    const next={...defaults};
+    try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved){
+      next.theme=['default','classic'].includes(saved.theme)?saved.theme:'default';
+      next.volume=Number.isFinite(saved.volume)?Math.max(0,Math.min(100,saved.volume)):70;
+      for(const name of ['muted','reduceMotion','largeChat','themeQuiet','themeDisabled'])next[name]=saved[name]===true;
+      next.output=typeof saved.output==='string'?saved.output:'';
+    }}catch{}
+    return next;
+  }
+  let prefs=readPrefs();
   const audio=new Audio();audio.preload='auto';
   let toneUrl=null;
   function apply(){
@@ -18,7 +22,8 @@ function createSettings({notify,onChange}) {
     audio.volume=prefs.volume/100;audio.muted=prefs.muted;
     $('theme-select').value=prefs.theme;$('sound-volume').value=prefs.volume;$('volume-value').value=prefs.volume+'%';
     $('sound-muted').checked=prefs.muted;$('reduce-motion').checked=prefs.reduceMotion;$('large-chat').checked=prefs.largeChat;
-    onChange?.();
+    $('theme-song-quarter').checked=prefs.themeQuiet;$('theme-song-disabled').checked=prefs.themeDisabled;
+    onChange?.({...prefs});
   }
   function save(){try{localStorage.setItem(key,JSON.stringify(prefs));}catch{}apply();}
   function message(text){$('audio-status').textContent=text;}
@@ -43,7 +48,7 @@ function createSettings({notify,onChange}) {
   $('settings-close').onclick=()=>$('settings-dialog').close();
   $('theme-select').onchange=e=>{prefs.theme=e.target.value;save();};
   $('sound-volume').oninput=e=>{prefs.volume=Number(e.target.value);save();};
-  for(const [id,name] of [['sound-muted','muted'],['reduce-motion','reduceMotion'],['large-chat','largeChat']])$(id).onchange=e=>{prefs[name]=e.target.checked;save();};
+  for(const [id,name] of [['sound-muted','muted'],['reduce-motion','reduceMotion'],['large-chat','largeChat'],['theme-song-quarter','themeQuiet'],['theme-song-disabled','themeDisabled']])$(id).onchange=e=>{prefs[name]=e.target.checked;save();};
   $('audio-output').onchange=e=>{const id=e.target.value;setOutput(id).catch(()=>{$('audio-output').value=prefs.output;message('Could not switch to that output. Choose another device or system default.');});};
   $('choose-output').onclick=async()=>{
     try{
@@ -68,5 +73,5 @@ function createSettings({notify,onChange}) {
   navigator.mediaDevices?.addEventListener?.('devicechange',()=>{if($('settings-dialog').open)void outputs();});
   window.addEventListener('storage',e=>{if(e.key===key)notify('Settings changed in another tab. Reload to use those preferences here.');});
   apply();
-  return {play,get values(){return {...prefs};},get audio(){return audio;}};
+  return {play,refresh(){prefs=readPrefs();apply();},get values(){return {...prefs};},get audio(){return audio;}};
 }
