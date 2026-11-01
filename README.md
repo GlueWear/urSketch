@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.9.0 is published from
+urSketch 0.10.0 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -69,10 +69,12 @@ preferences from another app are separate; create new rooms and invitations.
   conversation is below, and the canvas is on the right. The timer uses a grey dial that turns red for the final 20 seconds.
 - Create a room on your own ship. It supports 2–12 players.
 - Friends install urSketch on their ships, open their own `/apps/ursketch/play`, and
-  enter your ship in **Browse a host ship**. Search and join each show progress until the host responds.
-- Invite URLs carry `host` and `room`. Friends paste the copied URL into
-  **Room invite code** on their own ship. No one needs to log into another
-  player’s ship. Compact codes like `~sampel-palnet/room-abcd1234` also work.
+  enter your ship in the bottom search box or select a previously browsed host.
+  Search and join each show progress until the host responds.
+- Invite URLs carry `host` and `room` and still open the game directly on the
+  player’s own ship. The invite-code parser and compact codes such as
+  `~sampel-palnet/room-abcd1234` are retained; invite-entry controls are currently
+  hidden from the browser. No one needs to log into another player’s ship.
 - The owner starts the game. Each artist chooses among three words in 15 seconds,
   then has 80 seconds to draw. Guessers use the input under the Game log.
 - Correct guesses earn 10, 9, 8, 7, 6, then 5 points each. The drawer earns
@@ -218,3 +220,24 @@ click or keyboard to inspect their display name and permanent Urbit ID.
 logo, using sampled colours from the reference. The original PNG, intro logo
 and Landscape tile are unchanged. `web/connect.css` keeps the desktop reference
 geometry and stacks the form for small screens.
+
+## Classic room browser
+
+The /play lobby follows the owner's 1280×720 reference: compact urSketch logo
+with the version in small black text below it, beveled controls, pale welcome
+panel, blue scroll rails and a right-hand room table. Instructions, Settings and
+Create Room remain functional. There is no Studio or language selector. The
+bottom field searches a host ship; the selector above the rooms recalls known
+hosts. The existing game-screen theme and drawing layout are independent.
+
+The room heading counts distinct Urbit IDs across reachable known host ships,
+including players in rooms hidden by either filter. Known hosts are stored per
+browser/ship (up to 20) and watched for live lobby updates. A ship in multiple
+rooms or hosts counts once. The title tooltip reports reachable/known scope.
+Older hosts without player IDs contribute a conservative minimum, marked ≥.
+Unreachable hosts are excluded rather than presenting stale counts as live.
+
+Full means 12 players; empty means zero. The two filters are independent and
+saved locally. Point to a room name for its phase/capacity, or its player count
+for names and ship IDs. Click a room name to join. Rejoin/Leave recovery remains
+in the welcome panel. Direct invite URLs and the hidden code parser are retained.

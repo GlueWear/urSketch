@@ -45,7 +45,7 @@ with sync_playwright() as p:
     guest.locator('#player-name').fill('Bob')
     guest.locator('#profile-form button').click()
     expect(guest.locator('#profile-current')).to_have_text('Playing as Bob')
-    guest.locator('#search-invite-mode').click()
+    guest.evaluate("setSearchMode(\'invite\')")
     guest.locator('#host').fill(HOST + f'/apps/ursketch/play?host={host_ship}&room={room}')
     guest.locator('#host-search').click()
     expect(guest.locator('#game')).to_be_visible(timeout=60000)

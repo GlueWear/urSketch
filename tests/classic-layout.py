@@ -10,7 +10,7 @@ def cog(page):
     assert s['x']+s['width']>=page.viewport_size['width']-40 and s['y']<25,s
 
 def theme(page,value):
-    page.locator('#settings-open').click();page.locator('#theme-select').select_option(value);page.locator('#settings-close').click()
+    page.locator('#browser-settings' if page.locator('#lobby').is_visible() else '#settings-open').click();page.locator('#theme-select').select_option(value);page.locator('#settings-close').click()
 
 def rect(page,selector):return page.locator(selector).bounding_box()
 with sync_playwright() as p:
@@ -19,10 +19,10 @@ with sync_playwright() as p:
     for context,origin,code,name in zip(contexts,['http://127.0.0.1:18080','http://127.0.0.1:18081'],[codes['host'],codes['guest']],['Badspot','Rotondo']):
         assert context.request.post(origin+'/~/login',form={'password':code}).ok
         page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)));page.goto(origin+'/apps/ursketch/connect')
-        page.locator('#player-name').fill(name);page.locator('#profile-form button').click();expect(page.locator('#host-search')).to_be_enabled(timeout=30000);cog(page);theme(page,'classic');pages.append(page)
+        page.locator('#player-name').fill(name);page.locator('#profile-form button').click();expect(page.locator('#host-search')).to_be_enabled(timeout=30000);theme(page,'classic');pages.append(page)
     h,g=pages
     h.locator('#create-open').click();h.locator('#title').fill("Badspot's room");h.locator('#create-form button.primary').click();expect(h.locator('#game')).to_be_visible(timeout=30000)
-    room=h.evaluate('roomId');g.locator('#search-invite-mode').click();g.locator('#host').fill(f'~zod/{room}');g.locator('#host-search').click();expect(g.locator('#game')).to_be_visible(timeout=30000)
+    room=h.evaluate('roomId');g.evaluate("setSearchMode(\'invite\')");g.locator('#host').fill(f'~zod/{room}');g.locator('#host-search').click();expect(g.locator('#game')).to_be_visible(timeout=30000)
     h.locator('#start').click();expect(h.locator('#choices button')).to_have_count(3);h.locator('#choices button').first.click()
     for page in pages:page.wait_for_function("state.phase==='drawing'")
     h.evaluate("api.poke('draw',{lines:[{kind:'stroke',color:'#000000',width:3,x1:160,y1:140,x2:650,y2:500,opacity:100,filled:false,seed:0,id:'classic-proof'}]})")

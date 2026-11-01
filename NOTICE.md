@@ -29,3 +29,7 @@ the owner in login.png. The new page is implemented in native HTML/CSS/SVG;
 the two people and the reference logo image are not included. Its separate
 urSketch logo variant uses the owner-selected canonical urSketch PNG with a
 silver-blue gradient whose colours were sampled from that reference.
+
+The room-browser styling reference was supplied by the owner in room browser.png.
+The new HTML/CSS browser uses urSketch's existing logo and functional room data;
+the reference's people, Studio and language-category controls are not included.

@@ -92,25 +92,81 @@ with sync_playwright() as p:
     assert page.locator('#brush').get_attribute('title') == 'Brush (B)'
     assert page.locator('#host-form').count() == 1
     assert page.locator('#invite-form').count() == 0
-    assert page.evaluate("getComputedStyle(document.querySelector('.intro')).display") == 'grid'
+    assert page.locator('#search-invite-mode').is_hidden()
+    assert page.locator('#search-host-mode').is_hidden()
+    assert page.locator('#app-version').inner_text()==VERSION
+    page.set_viewport_size({'width':1280,'height':720})
+    left=page.locator('.browser-left>.classic-scroll-shell').bounding_box();right=page.locator('#room-browser').bounding_box()
+    assert abs(left['x']-30)<3 and abs(left['y']-126)<3 and abs(left['width']-859)<4,left
+    assert abs(right['x']-904)<4 and abs(right['y']-5)<3,right
+    assert page.locator('#browser-logo').bounding_box()['width']==180
+    assert page.locator('#app-version').bounding_box()['y']>page.locator('#browser-logo').bounding_box()['y']+60
+    assert page.evaluate('document.documentElement.scrollHeight<=innerHeight')
+    assert page.locator('#browser-player-total').inner_text().startswith('Rooms (')
+    page.locator('#browser-settings').click();expect(page.locator('#settings-dialog')).to_be_visible();page.locator('#theme-select').select_option('classic');page.locator('#settings-close').click()
+    assert page.locator('#hide-full-rooms').evaluate('el=>getComputedStyle(el).borderRadius')=='50%'
+    assert page.locator('.browser-version').evaluate('el=>getComputedStyle(el).color')=='rgb(0, 0, 0)'
+    page.locator('#browser-settings').click();page.locator('#theme-select').select_option('default');page.locator('#settings-close').click()
+    page.locator('#browser-help').click();expect(page.locator('#help-dialog')).to_be_visible();page.locator('#close-help').click()
     host_draft = page.locator('#host').input_value()
-    page.locator('#search-invite-mode').click()
+    page.evaluate("setSearchMode(\'invite\')")
     expect(page.locator('#host')).to_have_attribute('placeholder','Paste your room invite code or link')
     page.locator('#host').fill('invalid invite')
     page.locator('#host-search').click()
     expect(page.locator('#toast')).to_contain_text('Paste a room invite link')
-    page.locator('#search-host-mode').click()
+    page.evaluate("setSearchMode(\'host\')")
     expect(page.locator('#host')).to_have_value(host_draft)
     page.locator('#host-search').click()
     expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
     page.evaluate("$('toast').hidden=true")
     page.screenshot(path=str(artifacts / 'comet-lobby.png'), full_page=True)
+    # Use normal subscription callbacks for two simulated known hosts. This
+    # checks distinct-ID aggregation, updates, filter independence and reuse.
+    result=page.evaluate('''async()=>{
+      window.savedSubscribe=api.subscribe;window.remoteFeeds={};window.actualKnownHost=knownHosts.get(SELF);knownHosts.delete(SELF);let next=900000;
+      api.subscribe=(path,handler,initial,target)=>{
+        if(!['~zod','~nec'].includes(target))return savedSubscribe.call(api,path,handler,initial,target);
+        remoteFeeds[target]=handler;
+        handler({kind:'lobby',rooms:[]});return Promise.resolve(++next);
+      };
+      await watchHost('~zod');await watchHost('~nec');
+      const room=(id,count,ships)=>({id,title:id,phase:'waiting',count,players:ships.map(ship=>({ship,name:ship}))});
+      remoteFeeds['~zod']({kind:'lobby',rooms:[room('shared',2,['~zod','~bud']),room('empty',0,[])]});
+      remoteFeeds['~nec']({kind:'lobby',rooms:[room('other',2,['~bud','~wes'])]});
+      await browse('~zod');
+      return {total:$('browser-player-total').textContent,subscriptions:next};
+    }''')
+    assert result['total']=='Rooms (3 players)' and result['subscriptions']==900002,result
+    page.evaluate("remoteFeeds['~nec']({kind:'lobby',rooms:[{id:'other',title:'Other',phase:'waiting',count:1,players:[{ship:'~bud',name:'Bud'}]}]})")
+    expect(page.locator('#browser-player-total')).to_have_text('Rooms (2 players)')
+    page.evaluate('''()=>{const players=Array.from({length:12},(_,i)=>({ship:'~fixture-'+i,name:'Player '+i}));remoteFeeds['~zod']({kind:'lobby',rooms:[{id:'full',title:'Full room',phase:'drawing',count:12,players},{id:'empty',title:'Empty room',phase:'waiting',count:0,players:[]},{id:'open',title:'Open room',phase:'choosing',count:1,players:[{ship:'~bud',name:'Bud'}]}]});}''')
+    before=page.locator('#browser-player-total').inner_text()
+    assert page.locator('#room-list article').count()==3
+    page.locator('#hide-full-rooms').check();assert page.locator('#room-list article').count()==2
+    page.locator('#hide-empty-rooms').check();assert page.locator('#room-list article').count()==1
+    expect(page.locator('#room-list')).to_contain_text('Open room')
+    assert page.locator('#browser-player-total').inner_text()==before
+    page.locator('#hide-full-rooms').uncheck();page.locator('#hide-empty-rooms').uncheck()
+    page.screenshot(path=str(artifacts/'room-browser-reference.png'))
+    # The reference scroll rails must scroll real content by keyboard/arrows.
+    page.evaluate('''()=>{remoteFeeds['~zod']({kind:'lobby',rooms:Array.from({length:50},(_,i)=>({id:'scroll-'+i,title:'Drawing room '+i,phase:'waiting',count:0,players:[]}))});}''')
+    rail=page.locator('#room-browser .classic-scrollbar')
+    rail.locator('.scroll-down').click();assert page.locator('#room-list').evaluate('el=>el.scrollTop')>0
+    rail.locator('.scroll-thumb').focus();page.keyboard.press('End')
+    assert page.locator('#room-list').evaluate('el=>el.scrollTop+el.clientHeight>=el.scrollHeight-1')
+    # Remove simulated hosts without sending anything to remote ships.
+    page.evaluate('''async()=>{api.subscribe=savedSubscribe;knownHosts.delete('~zod');knownHosts.delete('~nec');knownHosts.set(SELF,actualKnownHost);await browse(SELF);renderPlayerTotal();}''')
     for width,height in [(1280,720),(1024,600),(390,844)]:
         page.set_viewport_size({'width':width,'height':height})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         page.locator('#host-form').scroll_into_view_if_needed()
         assert page.locator('#host-search').bounding_box()['width'] > 0
+        assert page.evaluate('document.documentElement.scrollHeight<=innerHeight')
+        page.screenshot(path=str(artifacts/('room-browser-mobile.png' if width==390 else 'room-browser-laptop.png')))
     page.set_viewport_size({'width':1440,'height':1000})
+    page.evaluate("()=>{window.cachedLobbyProbe=true;window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}));}")
+    page.wait_for_function('!window.cachedLobbyProbe && connectionReady')
+    expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
     page.locator('#create-open').click()
     page.locator('#title').fill('Installation check')
     page.locator('#create-form button.primary').click()
@@ -123,6 +179,10 @@ with sync_playwright() as p:
     assert page.locator('#timer-dial').is_visible()
     assert page.locator('#chat-form').bounding_box()['y'] < 720
     expect(page.locator('#player-count')).to_have_text('1/12')
+    if not preview:
+        page.wait_for_function('knownHosts.get(SELF)?.data?.rooms.find(r=>r.id===roomId)?.players?.some(p=>p.ship===SELF)')
+        roster=page.evaluate('knownHosts.get(SELF).data.rooms.find(r=>r.id===roomId).players')
+        assert any(player['ship']==page.evaluate('SELF') for player in roster),roster
     page.locator('#players .player-name').first.click()
     expect(page.locator('#player-profile-name')).to_have_text('Sketch Player')
     expect(page.locator('#player-profile-ship')).to_have_text(page.evaluate('SELF'))
@@ -140,7 +200,7 @@ with sync_playwright() as p:
     for invite in [f'{ship}/{room}',f'http://127.0.0.1/apps/ursketch/play?host={ship}&room={room}']:
         page.goto('http://127.0.0.1/apps/ursketch/play')
         expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
-        page.locator('#search-invite-mode').click()
+        page.evaluate("setSearchMode(\'invite\')")
         page.locator('#host').fill(invite)
         page.locator('#host-search').click()
         expect(page.locator('#game')).to_be_visible(timeout=30000)
@@ -169,5 +229,5 @@ with sync_playwright() as p:
     assert treaty['href']['site'] == '/apps/ursketch'
     (artifacts / 'comet-publication.json').write_text(json.dumps(treaty, indent=2) + '\n')
     assert not errors, errors
-    print(f'PASS on {ship}: username screen, full-ship/custom profiles, profile inspection, search, tools, refresh recovery/rejoin, room create/leave, Landscape tile, and Treaty publication')
+    print(f'PASS on {ship}: username screen, full-ship/custom profiles, profile inspection, reference room-browser layout, distinct known-host player counts, filters, hidden invite compatibility, search, tools, refresh recovery/rejoin, room create/leave, Landscape tile, and Treaty publication')
     browser.close()

@@ -415,7 +415,11 @@
   =/  items=(list json)
     %+  turn  ~(tap by rooms)
     |=  [rid=@t r=room]
-    (obj ~[['id' s+rid] ['title' s+title.r] ['count' (numb (lent players.r))] ['phase' s+phase.r]])
+    =/  people=(list json)
+      %+  turn  players.r
+      |=  p=player
+      (obj ~[['ship' s+(scot %p who.p)] ['name' s+(player-name who.p)]])
+    (obj ~[['id' s+rid] ['title' s+title.r] ['count' (numb (lent players.r))] ['phase' s+phase.r] ['players' a+people]])
   [%give %fact ~[/lobby] %json !>((obj ~[['kind' s+'lobby'] ['rooms' a+items]]))]
 ++  numb
   |=  n=@ud

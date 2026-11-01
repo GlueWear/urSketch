@@ -137,3 +137,29 @@ username/reference geometry, laptop/phone fit, full-ship/custom profiles, retry,
 profile inspection, room search/create/invites/rejoin, tile/publication, and the
 full intro suite with three audible playback passes. Syntax and whitespace
 checks passed.
+
+## 0.10.0 reference room browser and known-host counts
+
+comet.py checks guide/table reference bounds, logo/version placement, outer-page
+fit on laptops/phones, Settings/Instructions, real scroll-rail actions and native
+roster JSON on the installed ship. Two simulated remote subscription feeds test
+live count changes, distinct-ID deduplication, subscription reuse and filter
+independence. The fixture data stays in the test browser and sends no requests
+to those ships. Full/empty cases and compact/direct invite compatibility remain
+covered while entry controls are hidden. Prior two-/four-ship UI tests select
+the retained parser mode programmatically rather than clicking hidden controls.
+
+Screenshots: comet-lobby.png (actual host), room-browser-reference.png (temporary
+room fixtures), room-browser-laptop.png and room-browser-mobile.png. The intro
+suite uses the new lobby Settings button and retains three audible passes.
+
+Browser previews also passed after applying Classic settings and after a
+simulated back/forward-cache restoration. Restored /play pages reload to create
+fresh native channels and lobby subscriptions, preserving saved profiles and
+room recovery. The updated native agent compiled and is running on the comet.
+
+Live 0.10.0 verification passed after native agent/assets import and Treaty
+publication: authenticated native roster IDs, reference browser geometry,
+known-host count fixtures, filters, scroll rails, both themes, history refresh,
+profile/room/rejoin/invite flows, tile/publication and the full three-pass intro
+audio regression. JavaScript/Python syntax and whitespace checks passed.

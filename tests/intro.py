@@ -106,7 +106,7 @@ with sync_playwright() as p:
  for width,height in [(1024,600),(390,844),(320,568)]:fit(page,width,height)
  page.screenshot(path=str(ROOT/'artifacts/intro-mobile.png'))
  page.locator('#intro-play').click();page.wait_for_url('**/apps/ursketch/connect');expect(page.locator('#player-name')).to_have_value(page.evaluate('SELF'));page.locator('#connect-submit').click();page.wait_for_url('**/apps/ursketch/play');expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
- page.locator('#settings-open').click();expect(page.locator('#theme-song-quarter')).to_be_checked();expect(page.locator('#theme-song-disabled')).to_be_checked()
+ page.locator('#browser-settings').click();expect(page.locator('#theme-song-quarter')).to_be_checked();expect(page.locator('#theme-song-disabled')).to_be_checked()
  page.locator('#theme-song-disabled').uncheck();page.locator('#settings-close').click()
  page.goto(ORIGIN+'/apps/ursketch');page.wait_for_function('!testAudios[0].paused && testAudios[0].currentTime>0')
  assert abs(song(page,'music.volume')-.25)<.01

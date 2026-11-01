@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.9.0
+- Version: 0.10.0
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Username route: `/apps/ursketch/connect`
@@ -248,3 +248,44 @@ username/reference geometry, laptop/phone fit, full-ship/custom profiles, retry,
 profile inspection, room search/create/invites/rejoin, tile/publication, and the
 full intro suite with three audible playback passes. Syntax and whitespace
 checks passed.
+
+## 0.10.0 reference room browser — October 31, 2026
+
+The /play lobby is replaced by the supplied browser reference's geometry and
+scale: outer silver frame, compact logo/version, top beveled actions, pale guide,
+bottom host input, blue scroll rails and right-hand room table. Studio and
+language categories are omitted. Existing game/username/intro layouts remain
+separate; Default and Classic game preferences do not replace the lobby design.
+
+The language-tab space contains known-host selection and search progress.
+Invite-entry controls are hidden, but code parsing, copied invitations and direct
+room URLs are retained. Full/empty filters persist locally and affect visible
+rows only. Room names join; phase/capacity and player identities are available
+on hover/focus. Version remains small, black and left-aligned under the logo.
+
+Lobby JSON adds a public players array (name/ship) per room. No state migration,
+game rules, scoring or drawing payload changes are needed. The browser keeps
+live subscriptions to up to 20 remembered hosts and deduplicates IDs across all
+reported rooms, independently of filters. A tooltip identifies reachable/known
+host scope; disconnected hosts lose their live contribution. Legacy hosts
+without rosters produce a ≥ minimum instead of a false exact count.
+
+Preview verification passed: reference coordinates at 1280×720, laptop/mobile
+page fit, functional scroll arrows/keys, Settings/Instructions, independent
+filters, simulated host subscription updates and distinct-ID aggregation,
+subscription reuse, hidden invite parsing, direct invites, room/rejoin/profile
+flows and the full three-pass intro audio regression. Multi-host count fixtures
+use simulated subscription callbacks; live native-roster verification follows
+installation. The prior two-/four-ship suites were updated for hidden invite
+entry but are not rerun for this layout release.
+
+Browser previews also passed after applying Classic settings and after a
+simulated back/forward-cache restoration. Restored /play pages reload to create
+fresh native channels and lobby subscriptions, preserving saved profiles and
+room recovery. The updated native agent compiled and is running on the comet.
+
+Live 0.10.0 verification passed after native agent/assets import and Treaty
+publication: authenticated native roster IDs, reference browser geometry,
+known-host count fixtures, filters, scroll rails, both themes, history refresh,
+profile/room/rejoin/invite flows, tile/publication and the full three-pass intro
+audio regression. JavaScript/Python syntax and whitespace checks passed.
