@@ -117,3 +117,23 @@ The measured replay evidence is saved in artifacts/intro-loops.json.
 Live 0.8.2 intro verification passed, including three audible playback passes
 with cumulative callback timestamps, plus the normal room/rejoin/tile/publication
 checks. Syntax and whitespace checks passed.
+
+## 0.9.0 username and browsing separation
+
+The comet suite checks the separate username route before opening a channel,
+exact welcome text, no password input, full @p default, failed connection retry,
+custom-name persistence, read-only profile inspection and the normal room flow.
+The panel and form match reference coordinates at 1280×720; laptop/phone cases
+also assert that page and panel content fit without scrolling. Screenshots are
+artifacts/connect-desktop.png and connect-mobile.png. Preview mode now uses the
+authoritative build instead of duplicating its HTML/asset substitutions.
+
+The intro suite follows Play now → username → Connect → room browser in normal
+and reduced-motion cases and retains the multi-pass audible-loop regression.
+Existing browser.py and classic-layout.py now choose names on the separate page.
+
+Live 0.9.0 verification passed after native Clay import and Treaty publication:
+username/reference geometry, laptop/phone fit, full-ship/custom profiles, retry,
+profile inspection, room search/create/invites/rejoin, tile/publication, and the
+full intro suite with three audible playback passes. Syntax and whitespace
+checks passed.

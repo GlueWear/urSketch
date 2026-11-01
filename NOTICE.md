@@ -23,3 +23,9 @@ its audio stored separately as `theme_song.mp3`; the original wordmark is
 covered by a urSketch logo overlay. This source credit identifies the supplied
 material and does not imply authorship or affiliation. The original footage
 and music are not represented as newly authored urSketch artwork.
+
+The username-screen layout and silver logo-gradient reference were supplied by
+the owner in login.png. The new page is implemented in native HTML/CSS/SVG;
+the two people and the reference logo image are not included. Its separate
+urSketch logo variant uses the owner-selected canonical urSketch PNG with a
+silver-blue gradient whose colours were sampled from that reference.

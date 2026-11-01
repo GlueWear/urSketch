@@ -31,9 +31,7 @@ with sync_playwright() as p:
         page.add_init_script("""window.urSketchEvents=[]; const ES=window.EventSource;
           window.EventSource=class extends ES {constructor(...args){super(...args);
             this.addEventListener('message',e=>window.urSketchEvents.push(JSON.parse(e.data)));}};""")
-    host.goto(HOST + '/apps/ursketch/play')
-    expect(host.locator('#status')).to_contain_text('Connected as', timeout=30000)
-    host.screenshot(path=str(ARTIFACTS / 'lobby.png'), full_page=True)
+    host.goto(HOST + '/apps/ursketch/connect')
     host.locator('#player-name').fill('Alice')
     host.locator('#profile-form button').click()
     expect(host.locator('#profile-current')).to_have_text('Playing as Alice')
@@ -43,8 +41,7 @@ with sync_playwright() as p:
     expect(host.locator('#game')).to_be_visible(timeout=30000)
     room = host.evaluate('roomId')
     host_ship = host.evaluate('SELF')
-    guest.goto(GUEST + '/apps/ursketch/play')
-    expect(guest.locator('#status')).to_contain_text('Connected as', timeout=30000)
+    guest.goto(GUEST + '/apps/ursketch/connect')
     guest.locator('#player-name').fill('Bob')
     guest.locator('#profile-form button').click()
     expect(guest.locator('#profile-current')).to_have_text('Playing as Bob')

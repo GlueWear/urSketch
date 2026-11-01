@@ -2,9 +2,10 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.8.2
+- Version: 0.9.0
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
+- Username route: `/apps/ursketch/connect`
 - Lobby / direct room route: `/apps/ursketch/play`
 - Source: `https://github.com/infosovereignstack/urSketch`
 
@@ -214,3 +215,36 @@ responsive geometry and screenshot pixel checks also passed.
 Live 0.8.2 intro verification passed, including three audible playback passes
 with cumulative callback timestamps, plus the normal room/rejoin/tile/publication
 checks. Syntax and whitespace checks passed.
+
+## 0.9.0 separate username screen — October 31, 2026
+
+Play now and the intro fallback now lead to /apps/ursketch/connect. The existing
+authenticated HTML handler serves this route; no Gall state, game rules, native
+HTTP routing or protocol changes are required. An early route style prevents a
+flash of the room browser before the username view appears.
+
+The page uses the supplied screenshot's silver scanlined gradient, reference
+panel/form positions, glass Connect button and a separate gradient urSketch
+logo. The white-letter fill uses the canonical PNG's luminance mask and sampled
+reference colours; the canonical logo, animation and tile remain unchanged.
+There are no people and no password input. Welcome copy matches the request.
+
+The name field defaults to the full @p and validates the existing backend's
+96-byte UTF-8 limit. Connect opens the channel and saves the native profile
+before navigating to /play; failures preserve the field and allow retry. Direct
+invites and /play room recovery retain their existing behavior. The room browser
+has a name summary and Change name link instead of the old player editor.
+Players' display names and permanent ship IDs can be inspected by click/keyboard.
+
+Preview checks passed for reference geometry, no scrolling at 1280×720,
+1024×600, 390×844 and 320×568, full comet IDs, custom names, error/retry behavior,
+profile inspection, room creation/search/invites/rejoin, and the full intro
+suite including three audible passes with cumulative frame-callback timestamps.
+The two-ship browser/Classic test scripts were updated for the new name flow;
+they were not rerun because no game protocol or geometry changed.
+
+Live 0.9.0 verification passed after native Clay import and Treaty publication:
+username/reference geometry, laptop/phone fit, full-ship/custom profiles, retry,
+profile inspection, room search/create/invites/rejoin, tile/publication, and the
+full intro suite with three audible playback passes. Syntax and whitespace
+checks passed.

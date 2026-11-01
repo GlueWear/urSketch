@@ -15,6 +15,7 @@ docket = ROOT / 'desk/desk.docket-0'
 lines = [line for line in docket.read_text().splitlines() if not line.strip().startswith('image+')]
 lines.insert(next(i for i,line in enumerate(lines) if line.strip().startswith('version+')), "  image+'"+ICON_DATA_URL+"'")
 docket.write_text('\n'.join(lines)+'\n')
+html = html.replace('<!-- URSKETCH_CONNECT_LOGO -->', (ROOT/'web/connect-logo.svg').read_text().replace('<svg ', '<svg id="connect-logo" ', 1).replace('URSKETCH_CONNECT_LOGO_IMAGE', assets['images/ursketch-logo.png']['url']))
 classic = (ROOT / 'web/classic.css').read_text()
 for name in ('tools', 'hint', 'done'):
     uri = 'data:image/gif;base64,' + base64.b64encode((ROOT / f'web/classic-assets/{name}.gif').read_bytes()).decode()
@@ -22,14 +23,14 @@ for name in ('tools', 'hint', 'done'):
 for name in ('metal', 'metal-small'):
     uri = 'data:image/svg+xml;base64,' + base64.b64encode((ROOT / f'web/classic-assets/{name}.svg').read_bytes()).decode()
     classic = classic.replace('CLASSIC_'+name.upper().replace('-', '_')+'_IMAGE', uri)
-html = html.replace('/* URSKETCH_CSS */', (ROOT / 'web/style.css').read_text().replace('/* URSKETCH_CLASSIC */', classic))
+html = html.replace('/* URSKETCH_CSS */', (ROOT / 'web/style.css').read_text().replace('/* URSKETCH_CLASSIC */', classic).replace('/* URSKETCH_CONNECT */', (ROOT/'web/connect.css').read_text()))
 for name in ('skip', 'done'):
     uri = 'data:image/svg+xml;base64,' + base64.b64encode((ROOT / f'web/hint-{name}.svg').read_bytes()).decode()
     html = html.replace(f'DEFAULT_HINT_{name.upper()}_IMAGE', uri)
+html = html.replace('<script>/* URSKETCH_DRAWING */', '<script>window.URSKETCH_SHIP=URSKETCH_SHIP_VALUE;/* URSKETCH_DRAWING */', 1)
 html = html.replace('/* URSKETCH_DRAWING */', (ROOT / 'web/drawing.js').read_text())
 html = html.replace('/* URSKETCH_SETTINGS */', (ROOT / 'web/settings.js').read_text())
 html = html.replace('/* URSKETCH_JS */', (ROOT / 'web/app.js').read_text())
-html = html.replace('<script>', '<script>window.URSKETCH_SHIP=URSKETCH_SHIP_VALUE;', 1)
 before, after = html.split('URSKETCH_SHIP_VALUE', 1)
 intro = (ROOT/'web/intro.html').read_text().replace('URSKETCH_FAVICON_DATA_URL', FAVICON_DATA_URL)
 settings_dialog = re.search(r'<dialog id="settings-dialog".*?</dialog>', html, re.DOTALL).group()

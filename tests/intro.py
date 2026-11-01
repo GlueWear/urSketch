@@ -19,7 +19,8 @@ def prepare(context):
  if render:
   current=context.request.get(ORIGIN+'/apps/ursketch/play').text();ship=re.search(r"window.URSKETCH_SHIP='([^']+)'",current).group(1)
   context.route('**/apps/ursketch',lambda route:route.fulfill(status=200,content_type='text/html',body=render['intro']))
-  context.route('**/apps/ursketch/play',lambda route:route.fulfill(status=200,content_type='text/html',body=render['html'].replace('URSKETCH_SHIP_VALUE',json.dumps(ship))))
+  for path in ('play','connect'):
+   context.route('**/apps/ursketch/'+path,lambda route:route.fulfill(status=200,content_type='text/html',body=render['html'].replace('URSKETCH_SHIP_VALUE',json.dumps(ship))))
  context.add_init_script("window.testAudios=[];window.OriginalAudio=Audio;window.Audio=class extends OriginalAudio{constructor(...args){super(...args);testAudios.push(this);}}")
 def song(page,expression):return page.evaluate('()=>{const music=testAudios[0];return '+expression+';}')
 def slider(page,value):page.locator('#sound-volume').evaluate('(el,v)=>{el.value=v;el.dispatchEvent(new Event("input"));}',value)
@@ -104,7 +105,7 @@ with sync_playwright() as p:
  page.locator('#settings-close').click()
  for width,height in [(1024,600),(390,844),(320,568)]:fit(page,width,height)
  page.screenshot(path=str(ROOT/'artifacts/intro-mobile.png'))
- page.locator('#intro-play').click();page.wait_for_url('**/apps/ursketch/play');expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
+ page.locator('#intro-play').click();page.wait_for_url('**/apps/ursketch/connect');expect(page.locator('#player-name')).to_have_value(page.evaluate('SELF'));page.locator('#connect-submit').click();page.wait_for_url('**/apps/ursketch/play');expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
  page.locator('#settings-open').click();expect(page.locator('#theme-song-quarter')).to_be_checked();expect(page.locator('#theme-song-disabled')).to_be_checked()
  page.locator('#theme-song-disabled').uncheck();page.locator('#settings-close').click()
  page.goto(ORIGIN+'/apps/ursketch');page.wait_for_function('!testAudios[0].paused && testAudios[0].currentTime>0')
@@ -120,7 +121,7 @@ with sync_playwright() as p:
  reduced=browser.new_context(reduced_motion='reduce');prepare(reduced)
  rp=reduced.new_page();rp.goto(ORIGIN+'/apps/ursketch');rp.wait_for_function("document.body.classList.contains('art-ready')")
  assert rp.locator('video').evaluate('v=>v.paused&&!v.getAttribute("src")')
- rp.wait_for_function('testAudios[0].currentTime>0');rp.locator('#intro-play').click();expect(rp.locator('#lobby')).to_be_visible()
+ rp.wait_for_function('testAudios[0].currentTime>0');rp.locator('#intro-play').click();expect(rp.locator('#connect-page')).to_be_visible();rp.locator('#connect-submit').click();expect(rp.locator('#lobby')).to_be_visible()
  # Let three passes play naturally. Simulate a callback clock that continues
  # across loops; the media element's playhead still resets normally. The old
  # client used that unbounded clock to darken the logo and seek audio to EOF.

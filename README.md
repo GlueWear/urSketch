@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.8.2 is published from
+urSketch 0.9.0 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -17,7 +17,9 @@ On another ship, run:
 
 You can also browse that ship in Landscape’s app discovery and select urSketch.
 After installation, open its tile or `/apps/ursketch` for the animated intro.
-Choose **Play now** to enter the lobby at `/apps/ursketch/play`. The
+Choose **Play now** to enter the username screen at `/apps/ursketch/connect`.
+Choose a display name and press **Connect** to enter the room browser at
+`/apps/ursketch/play`. The
 publisher must be online for a new ship to download the desk and updates.
 The published desk currently targets Zuse 408.
 
@@ -170,7 +172,8 @@ a complete cached view for additional local tabs.
 Landscape opens the supplied animation with the selected original PNG wordmark.
 The original video stream is preserved rather than recreated. The real Play
 now target follows its button frame by frame; Instructions opens the rules.
-Play now opens the existing lobby, while direct invitations open the game.
+Play now opens the separate username screen; Connect saves the display name
+and opens the room browser. Direct invitations still open the game.
 
 The music is `desk/media/audio/music/theme_song.mp3`. Future cue files belong
 in `desk/media/audio/cues/`; game cue events are not wired yet. The theme starts
@@ -195,3 +198,23 @@ lettering beneath the new logo.
 The selected PNG stays unchanged; rendering removes faint low-alpha halo pixels
 while preserving the opaque lettering. See `desk/media/README.md` for media
 storage/build details and `NOTICE.md` for source credits.
+
+## Username screen
+
+`/apps/ursketch/connect` follows the supplied silver login reference, without
+people or a password field. The welcome text is owner-supplied. Username is
+prefilled with the full authenticated ship's @p, including comet names, and can
+be replaced with a display name. Connect opens the native ship channel, saves
+the profile, then navigates to the room browser. A failed connection leaves the
+form available for retry. No room browsing starts until Connect is pressed.
+
+The old player editor is replaced in the room browser with the current name
+and a Change name link. Saved player names remain local to this browser/ship.
+Native profile validation allows at most 96 UTF-8 bytes; the form uses the same
+limit instead of truncating long ship IDs. Select a player's name in a room by
+click or keyboard to inspect their display name and permanent Urbit ID.
+
+`web/connect-logo.svg` is a separate silver-gradient variant of the canonical
+logo, using sampled colours from the reference. The original PNG, intro logo
+and Landscape tile are unchanged. `web/connect.css` keeps the desktop reference
+geometry and stacks the form for small screens.

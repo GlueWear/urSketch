@@ -2,6 +2,9 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const SELF = window.URSKETCH_SHIP;
+const connectPage = document.documentElement.classList.contains('connect-route');
+$('connect-page').hidden=!connectPage;
+if(connectPage)document.title='urSketch · Connect';
 let activeName = SELF, profiles = [];
 const profileKey = `ursketch.players.${SELF}`;
 let host = SELF, roomId = '', state = null, lobbySub = null, roomSub = null;
@@ -204,7 +207,7 @@ async function maintainPresence(){
 }
 setInterval(()=>{void maintainPresence();},10000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void maintainPresence();});
-window.addEventListener('pagehide',()=>{const actions=[];if(state&&roomId){rememberRoom(state.title);actions.push({id:api.next++,action:'poke',ship:SELF.slice(1),app:'ursketch',mark:'json',json:{action:'away',host,room:roomId,request:`away-${api.uid}`,name:activeName}});}actions.push({id:api.next++,action:'delete'});api.events?.close();fetch(api.url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(actions),keepalive:true}).catch(()=>{});});
+window.addEventListener('pagehide',()=>{if(!api.events&&!api.opening)return;const actions=[];if(state&&roomId){rememberRoom(state.title);actions.push({id:api.next++,action:'poke',ship:SELF.slice(1),app:'ursketch',mark:'json',json:{action:'away',host,room:roomId,request:`away-${api.uid}`,name:activeName}});}actions.push({id:api.next++,action:'delete'});api.events?.close();fetch(api.url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(actions),keepalive:true}).catch(()=>{});});
 
 function isArtist() { return state?.players[0]?.ship === SELF; }
 function canDraw() { return connectionReady && state?.phase === 'drawing' && isArtist(); }
@@ -229,7 +232,7 @@ function renderRoom(data) {
   $('artist-secret').hidden=!(isArtist()&&data.phase==='drawing');
   $('word').textContent=isArtist()?data.answer:'';$('word-value').textContent=data.artistValue??10;
   $('player-count').textContent=`${data.players.length}/12`;
-  $('players').replaceChildren(...data.players.map((p,i)=>{const li=element('li',[(p.ship===SELF?'me':''),(p.solved?'solved':'')].filter(Boolean).join(' '));const label=element('div','player-name',p.name||p.ship);label.title=p.ship;label.append(element('span','player-role',p.solved?'✓ Correct':i===0&&['choosing','drawing'].includes(data.phase)?'✎ Drawing':p.ship===SELF?'You':'Guessing'));li.append(label,element('span','player-score',p.score));return li;}));
+  $('players').replaceChildren(...data.players.map((p,i)=>{const li=element('li',[(p.ship===SELF?'me':''),(p.solved?'solved':'')].filter(Boolean).join(' '));const label=element('div','player-name',p.name||p.ship);label.title=p.ship;label.tabIndex=0;label.setAttribute('role','button');label.setAttribute('aria-label',`Inspect ${p.name||p.ship}`);label.onclick=()=>inspectPlayer(p);label.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();inspectPlayer(p);}};label.append(element('span','player-role',p.solved?'✓ Correct':i===0&&['choosing','drawing'].includes(data.phase)?'✎ Drawing':p.ship===SELF?'You':'Guessing'));li.append(label,element('span','player-score',p.score));return li;}));
   drawing.render(data.lines,data.token);rememberRoom(data.title);
   $('overlay').hidden=data.phase==='drawing';$('start').hidden=!(data.owner===SELF&&['waiting','finished'].includes(data.phase));$('start').disabled=data.players.length<2;
   const winner=[...data.players].sort((a,b)=>b.score-a.score)[0];
@@ -293,10 +296,22 @@ function localLeave(){showLobby({keepRoom:false});}
 $('leave').onclick=()=>run(async()=>{await api.poke('leave');await api.unsubscribe(roomSub);localLeave();await browse(host);});
 $('invite').onclick=()=>run(async()=>{const invite=`${location.origin}/apps/ursketch/play?host=${encodeURIComponent(host)}&room=${roomId}`;await navigator.clipboard.writeText(invite);toast('Invite copied. Friends can paste it into urSketch on their own ship.');});
 $('help').onclick=()=>$('help-dialog').showModal();$('close-help').onclick=()=>$('help-dialog').close();
-function renderProfiles(){const select=$('profile-select');select.replaceChildren(...profiles.map(name=>{const option=element('option','',name);option.value=name;return option;}),new Option('New player…',''));select.value=profiles.includes(activeName)?activeName:'';$('player-name').value=activeName===SELF?'':activeName;$('profile-current').textContent=activeName===SELF?'Choose the name your friends will see.':`Playing as ${activeName}`;$('profile-avatar').textContent=activeName===SELF?'✎':Array.from(activeName)[0].toUpperCase();}
+function renderProfiles(){$('profile-current').textContent=`Playing as ${activeName}`;}
+function validPlayerName(name){return !!name&&!/[\u0000-\u001f\u007f]/.test(name)&&new TextEncoder().encode(name).length<=96;}
 function rememberProfile(name){activeName=name;if(!profiles.includes(name))profiles.push(name);profiles=profiles.slice(-20);try{localStorage.setItem(profileKey,JSON.stringify({names:profiles,active:name}));}catch{}renderProfiles();}
-$('profile-form').onsubmit=event=>{event.preventDefault();run(async()=>{const name=$('player-name').value.trim();if(!name)return;rememberProfile(name);if(host===SELF)await api.poke('profile');toast(`Player saved: ${name}`);});};
-$('profile-select').onchange=()=>{const name=$('profile-select').value;if(name)rememberProfile(name);else{$('player-name').value='';$('player-name').focus();}};
+$('player-name').value=SELF||'';
+$('player-name').oninput=()=>{$('player-name').setCustomValidity('');$('connect-error').textContent='';};
+$('profile-form').onsubmit=async event=>{
+  event.preventDefault();const name=$('player-name').value.trim(),button=$('connect-submit');
+  if(!validPlayerName(name)){$('player-name').setCustomValidity('Enter a display name using at most 96 bytes, without control characters.');$('player-name').reportValidity();return;}
+  button.disabled=true;button.textContent='Connecting…';$('connect-error').textContent='';
+  try{
+    await api.ensure();const previous=activeName;activeName=name;
+    try{await api.poke('profile',{}, {host:SELF,room:''});}catch(error){activeName=previous;throw error;}
+    rememberProfile(name);location.assign('/apps/ursketch/play');
+  }catch(error){$('connect-error').textContent=error.message||'Could not connect. Please try again.';button.disabled=false;button.textContent='Connect';}
+};
+function inspectPlayer(player){$('player-profile-name').textContent=player.name||player.ship;$('player-profile-ship').textContent=player.ship;$('player-profile-dialog').showModal();}
 function installClassicScrollbars(){
   for(const id of ['players','messages','chat-messages']){
     const content=$(id),shell=element('div','classic-scroll-shell'),rail=element('div','classic-scrollbar');
@@ -332,8 +347,8 @@ function syncThemeLayout(){
 }
 function fitCanvas(){const wrap=$('canvas').parentElement;if(!wrap.clientWidth||!wrap.clientHeight)return;const scale=Math.min(wrap.clientWidth/1000,wrap.clientHeight/700);$('canvas').style.width=`${Math.floor(1000*scale)}px`;$('canvas').style.height=`${Math.floor(700*scale)}px`;drawing?.fit();}
 new ResizeObserver(fitCanvas).observe($('canvas').parentElement);
-try{const saved=JSON.parse(localStorage.getItem(profileKey)||'null');if(saved){profiles=(saved.names||[]).filter(n=>typeof n==='string'&&n.length<=24);if(profiles.includes(saved.active))activeName=saved.active;}}catch{}
+try{const saved=JSON.parse(localStorage.getItem(profileKey)||'null');if(saved){profiles=(saved.names||[]).filter(n=>typeof n==='string'&&validPlayerName(n));if(profiles.includes(saved.active))activeName=saved.active;}}catch{}
 installClassicScrollbars();
 const preferences=createSettings({notify:toast,onChange:()=>{syncThemeLayout();requestAnimationFrame(fitCanvas);}});
 renderProfiles();drawing=createDrawing({canvas:$('canvas'),colors,canDraw,send:(action,data)=>api.poke(action,action==='draw'&&roomStream?{encoding:1,lines:data.lines.map(l=>UrSketchWire.pack(l))}:data),error:e=>toast(e.message||String(e)),storageKey:`ursketch.palettes.${SELF}`});restoreRecovery();
-run(async()=>{if(!SELF)throw new Error('Open urSketch through your Urbit ship at /apps/ursketch.');const query=new URLSearchParams(location.search);await browse(query.get('host')||SELF);const id=query.get('room');if(id){if(!savedRoom)saveRecovery({host,id,title:id,expiresAt:Date.now()+GRACE_MS});await joinRoom(id);}});
+if(!connectPage)run(async()=>{if(!SELF)throw new Error('Open urSketch through your Urbit ship at /apps/ursketch.');const query=new URLSearchParams(location.search);await browse(query.get('host')||SELF);const id=query.get('room');if(id){if(!savedRoom)saveRecovery({host,id,title:id,expiresAt:Date.now()+GRACE_MS});await joinRoom(id);}});
