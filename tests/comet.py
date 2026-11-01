@@ -95,6 +95,12 @@ with sync_playwright() as p:
     assert page.locator('#search-invite-mode').is_hidden()
     assert page.locator('#search-host-mode').is_hidden()
     assert page.locator('#app-version').inner_text()==VERSION
+    expect(page.locator('.browser-version')).to_have_text('v '+VERSION)
+    expect(page.locator('.browser-panel-label>span').first).to_have_text('Global Chat')
+    assert page.locator('#browser-hosts').count()==0
+    assert page.locator('#host-form').evaluate('el=>!!el.closest(".browser-room-controls")')
+    assert page.locator('#global-chat-form #host').count()==0
+    if not preview:expect(page.locator('#global-chat-input')).to_be_enabled(timeout=30000)
     page.set_viewport_size({'width':1280,'height':720})
     left=page.locator('.browser-left>.classic-scroll-shell').bounding_box();right=page.locator('#room-browser').bounding_box()
     assert abs(left['x']-30)<3 and abs(left['y']-126)<3 and abs(left['width']-859)<4,left
@@ -116,8 +122,11 @@ with sync_playwright() as p:
     expect(page.locator('#toast')).to_contain_text('Paste a room invite link')
     page.evaluate("setSearchMode(\'host\')")
     expect(page.locator('#host')).to_have_value(host_draft)
+    page.locator('#host').fill(page.evaluate('SELF'))
     page.locator('#host-search').click()
     expect(page.locator('#host-search')).to_be_enabled(timeout=30000)
+    expect(page.locator('#host')).to_have_value('')
+    assert page.evaluate('SELF') not in page.locator('#browse-status').inner_text()
     page.evaluate("$('toast').hidden=true")
     page.screenshot(path=str(artifacts / 'comet-lobby.png'), full_page=True)
     # Use normal subscription callbacks for two simulated known hosts. This

@@ -1,0 +1,6 @@
+{
+  "stateMigration": "4 to 5",
+  "roomPreserved": true,
+  "profilesAndScoresPreserved": true,
+  "newChatReady": true
+}

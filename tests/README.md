@@ -163,3 +163,26 @@ publication: authenticated native roster IDs, reference browser geometry,
 known-host count fixtures, filters, scroll rails, both themes, history refresh,
 profile/room/rejoin/invite flows, tile/publication and the full three-pass intro
 audio regression. JavaScript/Python syntax and whitespace checks passed.
+
+## 0.11.0 native Global Chat
+
+`global-chat.py` uses isolated ~zod/~nec HTTP 18080/18081 and discovers their Lens
+ports from 12322/12323. Their generated frontend points Global Chat at fake ~zod;
+production configuration remains the publisher comet. It checks native delivery
+both directions, trusted IDs, text escaping, history after refresh, profile
+inspection, search independence, draft retention and native input/cooldown bounds.
+It never posts to the production chat. The canonical logo response is supplied
+from the repository during this fake-only test. Evidence is recorded in
+artifacts/global-chat-verification.json and global-chat-fake-ships.png.
+
+An active room on the state-4 backend was retained while loading state 5;
+artifacts/global-chat-migration.json records room/profile/score preservation and
+new-chat readiness. comet.py verifies the new Global Chat label, v prefix, top
+search form, simplified results and live chat readiness without sending messages.
+
+Live 0.11.0 verification passed after native import and Treaty publication:
+v prefix, Global Chat readiness, top ship search, simplified room results,
+profile/room/rejoin/invite flows, known-host counts and filters, publication,
+and three audible intro passes. Live chat was read without posting test messages.
+The isolated fake ships were shut down after native delivery/migration checks.
+JavaScript/Python syntax and whitespace checks passed.

@@ -6,8 +6,10 @@
 +$  state-2  [%2 rooms=(map @t old-room) proxies=(map path json) names=(map @p @t)]
 +$  state-3  [%3 rooms=(map @t room-v3) proxies=(map path json) names=(map @p @t) leases=(map lease-key @da)]
 +$  state-4  [%4 rooms=(map @t room) proxies=(map path json) names=(map @p @t) leases=(map lease-key @da)]
++$  global-message  [who=@p label=@t text=@t at=@da]
++$  state-5  [%5 rooms=(map @t room) proxies=(map path json) names=(map @p @t) leases=(map lease-key @da) global-chat=(list global-message)]
 --
-=|  state-4
+=|  state-5
 =*  state  -
 ^-  agent:gall
 =<
@@ -20,17 +22,19 @@
   ++  on-save  !>(state)
   ++  on-load
     |=  old=vase
+    =/  v5=(unit state-5)  (mole |.(!<(state-5 old)))
     =/  v4=(unit state-4)  (mole |.(!<(state-4 old)))
     =/  v3=(unit state-3)  (mole |.(!<(state-3 old)))
     =/  v2=(unit state-2)  (mole |.(!<(state-2 old)))
     =/  v1=(unit state-1)  (mole |.(!<(state-1 old)))
     =.  state
-      ?^  v4  u.v4
-      ?^  v3  [%4 (~(run by rooms.u.v3) migrate-v3:ursketch-game) proxies.u.v3 names.u.v3 leases.u.v3]
-      ?^  v2  [%4 (~(run by rooms.u.v2) migrate-room:ursketch-game) proxies.u.v2 names.u.v2 ~]
-      ?^  v1  [%4 (~(run by rooms.u.v1) migrate-room:ursketch-game) proxies.u.v1 ~ ~]
+      ?^  v5  u.v5
+      ?^  v4  [%5 rooms.u.v4 proxies.u.v4 names.u.v4 leases.u.v4 ~]
+      ?^  v3  [%5 (~(run by rooms.u.v3) migrate-v3:ursketch-game) proxies.u.v3 names.u.v3 leases.u.v3 ~]
+      ?^  v2  [%5 (~(run by rooms.u.v2) migrate-room:ursketch-game) proxies.u.v2 names.u.v2 ~ ~]
+      ?^  v1  [%5 (~(run by rooms.u.v1) migrate-room:ursketch-game) proxies.u.v1 ~ ~ ~]
       =/  previous=state-0  !<(state-0 old)
-      [%4 (~(run by rooms.previous) migrate-room:ursketch-game) ~ ~ ~]
+      [%5 (~(run by rooms.previous) migrate-room:ursketch-game) ~ ~ ~ ~]
     on-init
   ++  on-poke
     |=  [=mark =vase]
@@ -63,7 +67,7 @@
 --
 |_  =bowl:gall
 ++  init
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   =/  keys=(list lease-key)
     %-  zing
     %+  turn  ~(tap by rooms)
@@ -83,7 +87,7 @@
   (lease-timer rid.key who.key until)
 ++  poke
   |=  [=mark =vase]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   ?+  mark  ~|('unsupported mark' !!)
     %handle-http-request
       =/  req  !<([id=@ta req=inbound-request:eyre] vase)
@@ -119,6 +123,15 @@
         ?>  (lte (met 3 label) 96)
         ?>  (levy (trip label) |=(c=@tD (gte c 32)))
         (~(put by names) src.bowl label)
+      ?:  =(act 'global-chat')
+        =/  body=@t  (text j 'text')
+        ?>  ?&((gth (met 3 body) 0) (lte (met 3 body) 240))
+        ?>  (levy (trip body) |=(c=@tD ?|(?&((gte c 32) (lte c 126)) (gte c 128))))
+        ?>  !(lien global-chat |=(m=global-message ?&(=(who.m src.bowl) (gth (add at.m ~s1) now.bowl))))
+        =/  messages=(list global-message)
+          [[src.bowl (player-name src.bowl) body now.bowl] global-chat]
+        =.  global-chat  (scag 100 messages)
+        [~[global-chat-card] state]
       ?:  =(act 'profile')
         ?>  =(src.bowl our.bowl)
         [~[lobby-card] state]
@@ -227,7 +240,7 @@
   ==
 ++  watch
   |=  =path
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   ?:  ?=([%http-response *] path)  [~ state]
   ?:  ?=([%proxy @ *] path)
     ?>  =(src.bowl our.bowl)
@@ -242,6 +255,7 @@
   ?:  =(path /relay)
     ?>  =(src.bowl our.bowl)
     [~ state]
+  ?:  =(path /global-chat)  [~[global-chat-card] state]
   ?:  =(path /lobby)  [~[lobby-card] state]
   ?:  ?=([%stream @ @ ~] path)
     =/  rid=@t  i.t.path
@@ -255,7 +269,7 @@
   [~[(view-card rid viewer)] state]
 ++  leave
   |=  =path
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   ?.  ?=([%proxy @ *] path)  [~ state]
   ?:  (lien ~(tap by sup.bowl) |=([d=duct who=ship p=(list @ta)] =(p path)))
     [~ state]
@@ -268,7 +282,7 @@
   ~
 ++  agent
   |=  [=wire =sign:agent:gall]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   ?:  ?=([%proxy @ *] wire)
     ?+  -.sign  [~ state]
       %fact
@@ -295,7 +309,7 @@
   [~[[%give %fact ~[/relay] %json !>(payload)]] state]
 ++  arvo
   |=  [=wire =sign-arvo]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   ?:  ?=([%presence @ @ ~] wire)
     ?.  ?=([%behn %wake *] sign-arvo)  [~ state]
     (expire i.t.wire (slav %p i.t.t.wire))
@@ -314,7 +328,7 @@
   [cards state]
 ++  fail
   |=  [=term =tang]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   ~&  tang
   [~ state]
 ++  text
@@ -336,7 +350,7 @@
   p.value
 ++  touch
   |=  [rid=@t who=@p]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   =/  exists=?  (~(has by leases) [rid who])
   =/  until=@da  (add now.bowl ~m2)
   =.  leases  (~(put by leases) [rid who] until)
@@ -349,7 +363,7 @@
   [%pass /presence/[rid]/[(scot %p who)] %arvo %b %wait (max until (add now.bowl ~s1))]
 ++  expire
   |=  [rid=@t who=@p]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   =/  until=(unit @da)  (~(get by leases) [rid who])
   ?~  until  [~ state]
   ?:  (gth u.until now.bowl)
@@ -380,7 +394,7 @@
   [%pass /turn/[rid]/[(scot %ud token.r)] %arvo %b %wait deadline.r]
 ++  respond
   |=  [id=@ta code=@ud mime=@t body=@t]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   =/  headers=(list [@t @t])
     ~[['Content-Type' mime] ['Cache-Control' 'no-store'] ['X-Content-Type-Options' 'nosniff']]
   =.  headers
@@ -393,7 +407,7 @@
   ==
 ++  respond-media
   |=  [id=@ta mime=@t etag=@t body=octs]
-  ^-  (quip card state-4)
+  ^-  (quip card state-5)
   =/  headers=(list [@t @t])
     :~  ['Content-Type' mime]
         ['Cache-Control' 'private, max-age=31536000, immutable']
@@ -410,6 +424,13 @@
   |=  pairs=(list [@t json])
   ^-  json
   [%o (~(gas by *(map @t json)) pairs)]
+++  global-chat-card
+  ^-  card
+  =/  items=(list json)
+    %+  turn  (flop global-chat)
+    |=  m=global-message
+    (obj ~[['id' s+(cat 3 (scot %p who.m) (scot %da at.m))] ['ship' s+(scot %p who.m)] ['name' s+label.m] ['text' s+text.m] ['at' s+(scot %da at.m)]])
+  [%give %fact ~[/global-chat] %json !>((obj ~[['kind' s+'global-chat'] ['messages' a+items]]))]
 ++  lobby-card
   ^-  card
   =/  items=(list json)

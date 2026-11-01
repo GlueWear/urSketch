@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.10.0 is published from
+urSketch 0.11.0 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -69,7 +69,7 @@ preferences from another app are separate; create new rooms and invitations.
   conversation is below, and the canvas is on the right. The timer uses a grey dial that turns red for the final 20 seconds.
 - Create a room on your own ship. It supports 2–12 players.
 - Friends install urSketch on their ships, open their own `/apps/ursketch/play`, and
-  enter your ship in the bottom search box or select a previously browsed host.
+  enter your ship in the search box above the room list.
   Search and join each show progress until the host responds.
 - Invite URLs carry `host` and `room` and still open the game directly on the
   player’s own ship. The invite-code parser and compact codes such as
@@ -224,11 +224,12 @@ geometry and stacks the form for small screens.
 ## Classic room browser
 
 The /play lobby follows the owner's 1280×720 reference: compact urSketch logo
-with the version in small black text below it, beveled controls, pale welcome
+with a v-prefixed version in small black text below it, beveled controls, pale welcome
 panel, blue scroll rails and a right-hand room table. Instructions, Settings and
 Create Room remain functional. There is no Studio or language selector. The
-bottom field searches a host ship; the selector above the rooms recalls known
-hosts. The existing game-screen theme and drawing layout are independent.
+bottom field sends Global Chat messages. Ship search is above the
+room list; successful searches clear the field and show room names, or None found.
+Known hosts remain remembered for the player count without a ship-name dropdown. The existing game-screen theme and drawing layout are independent.
 
 The room heading counts distinct Urbit IDs across reachable known host ships,
 including players in rooms hidden by either filter. Known hosts are stored per
@@ -241,3 +242,23 @@ Full means 12 players; empty means zero. The two filters are independent and
 saved locally. Point to a room name for its phase/capacity, or its player count
 for names and ship IDs. Click a room name to join. Rejoin/Leave recovery remains
 in the welcome panel. Direct invite URLs and the hidden code parser are retained.
+
+## Global Chat
+
+The room browser uses one shared native chat hosted on the publisher comet,
+independently of the ship being searched. `web/chat-config.json` supplies that
+host at build time. Each browser connects through its own ship's authenticated
+Eyre channel; the existing native relay/proxy carries chat to the shared host.
+Room searching, player counts and room chat remain separate.
+
+The host stores the latest 100 messages, with the actual sender's Urbit ID,
+display name and timestamp. Message text is rendered as plain text, and sender
+names open the identity inspector. The host accepts up to 240 UTF-8 bytes per
+message and one message per sender per second. Failed sends retain the draft;
+unavailable/disconnected chat offers Retry and does not block room browsing.
+The service is public to ships using the app; chat readers are not added to
+the room-player total unless they are in a room.
+
+Agent state 5 adds chat history. Migration copies existing rooms, drawing data,
+profiles, proxy caches and presence leases from state 4; older migrations remain
+supported. The upgrade was verified with a room active on an isolated ship.

@@ -53,7 +53,7 @@ with sync_playwright() as p:
     assert 'Draw a little closer.' not in h.locator('body').inner_text()
     inject_delay(g);g.evaluate("window.testDelay='lobby'")
     g.locator('#host').fill('~zod');g.locator('#host-search').click()
-    expect(g.locator('#browse-status')).to_contain_text('Browsing')
+    expect(g.locator('#browse-status')).to_contain_text('Searching')
     expect(g.locator('#host-search')).to_be_disabled()
     expect(g.locator('#host-search')).to_be_enabled(timeout=30000)
     h.locator('#create-open').click();h.locator('#title').fill(TITLE);h.locator('#create-form button.primary').click()

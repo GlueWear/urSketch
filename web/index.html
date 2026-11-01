@@ -11,26 +11,26 @@
 </section>
 <section id="lobby" aria-label="Room browser">
  <div class="browser-left">
-  <div class="browser-masthead"><a href="/apps/ursketch" aria-label="urSketch introduction"><img id="browser-logo" src="URSKETCH_BROWSER_LOGO_URL" alt="urSketch"></a><span class="browser-version">urSketch <span id="app-version">URSKETCH_APP_VERSION</span></span><div class="browser-actions"><button id="browser-help" type="button">Instructions</button><button id="browser-settings" type="button">Settings</button><button id="create-open" type="button">Create Room</button></div></div>
-  <div class="browser-panel-label">Welcome</div>
+  <div class="browser-masthead"><a href="/apps/ursketch" aria-label="urSketch introduction"><img id="browser-logo" src="URSKETCH_BROWSER_LOGO_URL" alt="urSketch"></a><span class="browser-version">v <span id="app-version">URSKETCH_APP_VERSION</span></span><div class="browser-actions"><button id="browser-help" type="button">Instructions</button><button id="browser-settings" type="button">Settings</button><button id="create-open" type="button">Create Room</button></div></div>
+  <div class="browser-panel-label"><span>Global Chat</span><span id="global-chat-status" role="status" aria-live="polite">Connecting…</span><button id="global-chat-retry" type="button" hidden>Retry</button></div>
   <div id="browser-guide" class="browser-guide" tabindex="0">
    <div id="room-recovery" class="room-recovery" hidden><div><strong id="recovery-title">Return to your room</strong><p id="recovery-detail"></p></div><div class="recovery-actions"><button id="rejoin-room" class="primary">Rejoin</button><button id="leave-saved-room">Leave room</button></div></div>
    <p>Please click on “Instructions” above to view the rules. Joining a game indicates you have reviewed and will abide by the game rules.</p>
    <p><b>PLAY:</b> Point to a room name on the right to view its details. Point to the number of players to view players' names. Click a room name to join the game.</p>
-   <p><b>SEARCH:</b> Enter a friend's Urbit ship in the box below and click Search. Previously browsed ships are available above the room list.</p>
+   <p><b>SEARCH:</b> Enter a friend's Urbit ship in the search box above the rooms. Select a room from the results to join.</p>
    <p><b>ROOMS:</b> Create a room on your ship and invite your friends. Use the full and empty selections to hide those rooms from the list.</p>
    <p class="browser-courtesy">Use common courtesy, play a fair game and <b>ENJOY!</b></p>
    <div class="player-summary"><p id="profile-current"></p><a href="/apps/ursketch/connect">Change name</a></div>
 
-   <p id="join-status" class="operation-status" role="status" aria-live="polite"></p>
+   <p id="join-status" class="operation-status" role="status" aria-live="polite"></p><div id="global-messages" role="log" aria-label="Global Chat messages" aria-live="polite"></div>
   </div>
-  <div class="host-bar room-search">
-   <div class="search-modes" role="tablist" aria-label="Room search method" hidden><button id="search-host-mode" type="button" role="tab" aria-selected="true" aria-controls="host-form">Browse a host ship</button><button id="search-invite-mode" type="button" role="tab" aria-selected="false" aria-controls="host-form" tabindex="-1">Room invite code</button></div>
-   <form id="host-form" role="tabpanel" aria-labelledby="search-host-mode"><label id="search-label" class="sr-only" for="host">Browse a host ship</label><input id="host" placeholder="~sampel-palnet" autocomplete="off" spellcheck="false" required><button id="host-search">Search →</button></form>
-  </div>
+  <form id="global-chat-form"><label for="global-chat-input" class="sr-only">Global Chat message</label><input id="global-chat-input" maxlength="240" autocomplete="off" placeholder="Chat with everyone…" required disabled><button id="global-chat-send" type="submit" disabled>Send</button></form>
  </div>
  <aside id="room-browser" aria-label="Rooms">
-  <div class="browser-room-controls"><h2 id="browser-player-total" aria-live="polite">Rooms (… players)</h2><div class="browser-filters"><span>Don't show:</span><label><input id="hide-full-rooms" type="checkbox" aria-label="Hide full rooms"> full</label><label><input id="hide-empty-rooms" type="checkbox" aria-label="Hide empty rooms"> empty</label></div><label class="sr-only" for="browser-hosts">Host ship</label><select id="browser-hosts" aria-label="Host ship"></select><p id="browse-status" class="operation-status" role="status" aria-live="polite"></p></div>
+  <div class="browser-room-controls"><h2 id="browser-player-total" aria-live="polite">Rooms (… players)</h2><div class="browser-filters"><span>Don't show:</span><label><input id="hide-full-rooms" type="checkbox" aria-label="Hide full rooms"> full</label><label><input id="hide-empty-rooms" type="checkbox" aria-label="Hide empty rooms"> empty</label></div><div class="host-bar room-search">
+   <div class="search-modes" role="tablist" aria-label="Room search method" hidden><button id="search-host-mode" type="button" role="tab" aria-selected="true" aria-controls="host-form">Browse a host ship</button><button id="search-invite-mode" type="button" role="tab" aria-selected="false" aria-controls="host-form" tabindex="-1">Room invite code</button></div>
+   <form id="host-form" role="tabpanel" aria-labelledby="search-host-mode"><label id="search-label" class="sr-only" for="host">Browse a host ship</label><input id="host" placeholder="Search a ship…" autocomplete="off" spellcheck="false" required><button id="host-search">Search →</button></form>
+  </div><p id="browse-status" class="operation-status" role="status" aria-live="polite"></p></div>
   <div class="browser-columns"><span>Roomname</span><span>Players</span></div>
   <div id="room-list" class="room-list" aria-label="Available rooms"></div>
  </aside>

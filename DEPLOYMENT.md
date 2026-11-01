@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.10.0
+- Version: 0.11.0
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Username route: `/apps/ursketch/connect`
@@ -289,3 +289,41 @@ publication: authenticated native roster IDs, reference browser geometry,
 known-host count fixtures, filters, scroll rails, both themes, history refresh,
 profile/room/rejoin/invite flows, tile/publication and the full three-pass intro
 audio regression. JavaScript/Python syntax and whitespace checks passed.
+
+## 0.11.0 shared chat and search separation — November 1, 2026
+
+The version below the logo reads v followed by the actual release. The left
+panel is Global Chat and its bottom form sends messages. The former host
+selector area now contains ship search. Results show room rows or None found;
+the completed search does not leave a full ship name in the field or status.
+Known hosts still feed the independent player total, and hidden invite parsing
+and direct invitations remain intact.
+
+All clients use the publisher comet configured in web/chat-config.json for
+shared chat, independent of their current room host. Native /global-chat watches
+publish a bounded 100-message history; the global-chat action validates message
+length/control characters and a one-second identity cooldown. Sender IDs come
+from the native source ship rather than JSON claims. Plain-text rendering and
+identity inspection are retained. The service has its own ready/retry/send state
+and cannot prevent room browsing when unavailable.
+
+State 5 adds the message log without changing room records or game rules.
+A state-4 room was kept active through the upgrade on clean fake ~zod; its room,
+profiles and scores were checked afterward. Cross-ship tests with fake ~nec
+verified both directions, a forged sender field being ignored, search/chat
+independence, retained failed drafts, history after refresh, plain-text markup,
+message bounds and cooldown. Test posts were confined to local-only fake ships.
+The clean tests use Vere 4.6 / Zuse 408, matching the publisher runtime.
+
+The compiler caught an inferred nonempty-list type in the first history trim;
+the corrected implementation explicitly types the list before applying scag.
+The failing version was never installed on the publisher. Preview page/room
+checks passed, including moved search and the v prefix. Native live verification
+follows the final import; live checks will read chat without posting test messages.
+
+Live 0.11.0 verification passed after native import and Treaty publication:
+v prefix, Global Chat readiness, top ship search, simplified room results,
+profile/room/rejoin/invite flows, known-host counts and filters, publication,
+and three audible intro passes. Live chat was read without posting test messages.
+The isolated fake ships were shut down after native delivery/migration checks.
+JavaScript/Python syntax and whitespace checks passed.

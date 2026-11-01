@@ -1,0 +1,14 @@
+{
+  "isolatedShips": [
+    "~zod",
+    "~nec"
+  ],
+  "sharedHost": "~zod",
+  "bothDirections": true,
+  "senderIdentityVerified": true,
+  "searchIndependent": true,
+  "refreshHistory": true,
+  "failedSendRetainsDraft": true,
+  "boundsAndCooldown": true,
+  "plainTextRendering": true
+}
