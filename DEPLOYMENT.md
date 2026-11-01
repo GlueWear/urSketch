@@ -2,7 +2,7 @@
 
 - Publisher: `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`
 - Desk and Gall agent: `%ursketch`
-- Version: 0.8.1
+- Version: 0.8.2
 - Runtime: Vere 4.6 / Zuse 408
 - Intro route: `/apps/ursketch`
 - Lobby / direct room route: `/apps/ursketch/play`
@@ -192,3 +192,25 @@ settings, navigation and media checks.
 Live 0.8.1 verification passed after native Clay import and Treaty publication:
 intro pixel/geometry/audio checks and the normal room/rejoin/tile/publication
 smoke suite. JavaScript/Python syntax and whitespace checks passed.
+
+## 0.8.2 synchronized intro replay — October 31, 2026
+
+Frame/button tracking, logo brightness and audio synchronization now use the
+video element's local currentTime instead of requestVideoFrameCallback's
+presentation timestamp. Loop detection explicitly seeks the music back to the
+new visual playhead and resumes it if it stopped, respecting all saved music,
+mute and volume preferences. This also accounts for the MP3 and video having
+slightly different durations. The source animation, media files, original fade,
+logo artwork, background repair and scene size are unchanged.
+
+The preview suite passed three natural playback passes with actual Web Audio
+signal measurements, full logo brightness at each new pass, and audio/video
+drift below 60 ms in the measured windows. The test deliberately makes callback
+timestamps cumulative after the first loop: this previously selected the final
+dark logo frame and attempted to seek audio past its duration. Regression output
+is stored in artifacts/intro-loops.json. The existing media, settings, navigation,
+responsive geometry and screenshot pixel checks also passed.
+
+Live 0.8.2 intro verification passed, including three audible playback passes
+with cumulative callback timestamps, plus the normal room/rejoin/tile/publication
+checks. Syntax and whitespace checks passed.

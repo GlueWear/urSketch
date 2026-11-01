@@ -4,7 +4,7 @@
   const $=id=>document.getElementById(id),video=$('intro-video'),play=$('intro-play');
   const track=URSKETCH_INTRO_MOTION,settingsKey='ursketch.settings.v1',themeUrl='URSKETCH_INTRO_AUDIO_URL';
   const music=new Audio();music.preload='auto';music.loop=true;
-  let prefs={},unlocked=false,pendingMusic=null,loading=null,videoUrl=null,poster=null,visualPaused=false,framePending=false,leaving=false;
+  let prefs={},unlocked=false,pendingMusic=null,loading=null,videoUrl=null,poster=null,visualPaused=false,framePending=false,leaving=false,lastPosition=null;
   const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
   // Render the decoded footage and the repaired background in one sRGB surface.
   // A video compositor can display different blue values from drawImage samples.
@@ -34,16 +34,25 @@
     context.fillStyle=css(circle);context.beginPath();context.arc(738,532,511,0,Math.PI*2);context.fill();context.restore();
     document.documentElement.style.setProperty('--intro-sky',css(sky));
   }
-  function align(time){
+  function align(){
+    // Use the media element's local playhead for every replay, independently
+    // of callback presentation timestamps that may belong to another timeline.
+    const time=video.readyState>=2?video.currentTime:0;
+    const wrapped=lastPosition!==null&&time<lastPosition-.5;lastPosition=time;
     const n=Math.max(0,Math.min(track.frames.length-1,Math.floor(time*track.fps+.001))),[x,y,w,h]=track.frames[n];
     play.style.left=`${x/track.width*100}%`;play.style.top=`${y/track.height*100}%`;play.style.width=`${w/track.width*100}%`;play.style.height=`${h/track.height*100}%`;
     paintFrame(video.readyState>=2?video:poster);$('intro-wordmark').style.filter=`url(#logo-alpha-cleanup) brightness(${track.brightness[n]??1})`;
-    if(!video.paused&&!visualPaused&&unlocked&&!music.paused&&Math.abs(music.currentTime-time)>.18){try{music.currentTime=time;}catch{}}
+    if(!video.paused&&!visualPaused&&unlocked&&themeEnabled()){
+      // The MP3 and video have slightly different durations. Explicitly reset
+      // audio on every visual wrap, including recovery from an ended song.
+      if(wrapped||(!music.paused&&Math.abs(music.currentTime-time)>.18)){try{music.currentTime=time;}catch{}}
+      if(wrapped&&music.paused)void startMusic();
+    }
   }
   function frames(){
     if(framePending||video.paused||document.hidden)return;framePending=true;
-    if(video.requestVideoFrameCallback)video.requestVideoFrameCallback((_,data)=>{framePending=false;align(data.mediaTime);frames();});
-    else requestAnimationFrame(()=>{framePending=false;align(video.currentTime);frames();});
+    if(video.requestVideoFrameCallback)video.requestVideoFrameCallback(()=>{framePending=false;align();frames();});
+    else requestAnimationFrame(()=>{framePending=false;align();frames();});
   }
   async function output(){
     if(music.setSinkId&&music.sinkId!==prefs.output){try{await music.setSinkId(prefs.output||'');}catch{try{await music.setSinkId('');}catch{}}}
@@ -85,7 +94,7 @@
   function refreshPrefs(){preferences.refresh();}
   function interaction(event){if(event.isTrusted&&(!unlocked||music.paused))void startMusic();}
   document.addEventListener('pointerdown',interaction,{capture:true});document.addEventListener('keydown',interaction,{capture:true});
-  video.addEventListener('playing',frames);video.addEventListener('seeked',()=>align(video.currentTime));
+  video.addEventListener('playing',frames);video.addEventListener('seeked',()=>align());
   video.addEventListener('error',()=>{status('Animation unavailable. Use Play now to continue.');$('intro-fallback').hidden=false;});
   let resumeHelp=false;
   $('intro-instructions').onclick=()=>{resumeHelp=!visualPaused;void setVisualPaused(true);$('intro-help').showModal();};
@@ -100,5 +109,5 @@
   const image=src=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
   Promise.all([image('URSKETCH_INTRO_POSTER_URL').then(img=>{poster=img;paintFrame(img);}),image('URSKETCH_INTRO_WORDMARK_URL')])
     .then(()=>document.body.classList.add('art-ready')).catch(()=>{status('Artwork unavailable. Use Play now to continue.');$('intro-fallback').hidden=false;});
-  align(0);if(!visualPaused)void load();
+  align();if(!visualPaused)void load();
 })();

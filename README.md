@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.8.1 is published from
+urSketch 0.8.2 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -181,7 +181,9 @@ click or key retries it; there is no bottom control bar.
 The intro's top-right gear opens the same Settings menu as the game. **Theme
 song at 25% volume** applies one quarter of its normal level after master volume;
 **Disable theme song** stops only the music. Both are saved in this browser.
-Master mute, volume, and selected audio output still apply. Reduced motion
+Master mute, volume, and selected audio output still apply. Each animation loop
+resets the song to the video’s local playhead so music, logo brightness and moving
+buttons repeat together. Reduced motion
 pauses visuals independently of music. Leaving or hiding the intro pauses audio.
 
 The animation displays at 90% of the 0.8.0 size (72% of its original size).

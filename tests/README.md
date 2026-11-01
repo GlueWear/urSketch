@@ -104,3 +104,16 @@ decoded-sample check missed. Geometry now expects .72 of the original size.
 Live 0.8.1 verification passed after native Clay import and Treaty publication:
 intro pixel/geometry/audio checks and the normal room/rejoin/tile/publication
 smoke suite. JavaScript/Python syntax and whitespace checks passed.
+
+## 0.8.2 replay regression
+
+The intro suite now lets the footage play naturally through two loop boundaries
+and measures the first pass plus two replays. A Web Audio analyser verifies an
+actual nonzero audio signal in each pass, alongside synchronized playheads and
+full logo brightness. Frame-callback timestamps deliberately continue beyond
+the clip duration after each loop; playback must use local video time instead.
+The measured replay evidence is saved in artifacts/intro-loops.json.
+
+Live 0.8.2 intro verification passed, including three audible playback passes
+with cumulative callback timestamps, plus the normal room/rejoin/tile/publication
+checks. Syntax and whitespace checks passed.

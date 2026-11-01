@@ -121,6 +121,48 @@ with sync_playwright() as p:
  rp=reduced.new_page();rp.goto(ORIGIN+'/apps/ursketch');rp.wait_for_function("document.body.classList.contains('art-ready')")
  assert rp.locator('video').evaluate('v=>v.paused&&!v.getAttribute("src")')
  rp.wait_for_function('testAudios[0].currentTime>0');rp.locator('#intro-play').click();expect(rp.locator('#lobby')).to_be_visible()
+ # Let three passes play naturally. Simulate a callback clock that continues
+ # across loops; the media element's playhead still resets normally. The old
+ # client used that unbounded clock to darken the logo and seek audio to EOF.
+ loops=browser.new_context(viewport={'width':1280,'height':900});prepare(loops)
+ loops.add_init_script("""(()=>{
+  const original=HTMLVideoElement.prototype.requestVideoFrameCallback,clocks=new WeakMap();
+  HTMLVideoElement.prototype.requestVideoFrameCallback=function(callback){
+   return original.call(this,(now,data)=>{
+    const clock=clocks.get(this)||{last:0,offset:0};
+    if(data.mediaTime<clock.last-.5)clock.offset+=this.duration;
+    clock.last=data.mediaTime;clocks.set(this,clock);
+    window.testCallbackTime=data.mediaTime+clock.offset;
+    callback(now,{...data,mediaTime:window.testCallbackTime});
+   });
+  };
+ })();""")
+ lp=loops.new_page();lp.on('pageerror',lambda e:errors.append(str(e)));lp.goto(ORIGIN+'/apps/ursketch')
+ lp.wait_for_function('document.querySelector("video").readyState>=2 && !testAudios[0].paused')
+ lp.evaluate("""async()=>{
+  const audio=testAudios[0],video=document.querySelector('video');
+  const ac=new AudioContext(),source=ac.createMediaElementSource(audio),analyser=ac.createAnalyser();
+  source.connect(analyser);analyser.connect(ac.destination);await ac.resume();
+  window.loopAudioContext=ac;const data=new Float32Array(analyser.fftSize);
+  const probe=window.introLoopProbe={cycle:0,last:video.currentTime,passes:[]};
+  window.loopProbeTimer=setInterval(()=>{
+   const time=video.currentTime;if(time<probe.last-.5)probe.cycle++;probe.last=time;
+   if(time<2||time>3)return;
+   const pass=probe.passes[probe.cycle]||={samples:0,peakRms:0,maxDrift:0,minBrightness:1,paused:false};
+   analyser.getFloatTimeDomainData(data);const rms=Math.sqrt(data.reduce((sum,v)=>sum+v*v,0)/data.length);
+   const brightness=Number(document.querySelector('#intro-wordmark').style.filter.match(/brightness\(([^)]+)\)/)[1]);
+   pass.samples++;pass.peakRms=Math.max(pass.peakRms,rms);pass.maxDrift=Math.max(pass.maxDrift,Math.abs(audio.currentTime-time));
+   pass.minBrightness=Math.min(pass.minBrightness,brightness);pass.paused||=audio.paused||audio.ended;
+  },50);
+ }""")
+ lp.wait_for_function('introLoopProbe.passes[2]?.samples>=8',timeout=55000)
+ result=lp.evaluate("()=>{clearInterval(loopProbeTimer);return {passes:introLoopProbe.passes,callbackTime:testCallbackTime,videoTime:document.querySelector('video').currentTime};}")
+ assert result['callbackTime']>36 and result['videoTime']<4,result
+ for playback in result['passes'][:3]:
+  assert playback['samples']>=8 and playback['peakRms']>.001,playback
+  assert playback['maxDrift']<.35 and playback['minBrightness']==1 and not playback['paused'],playback
+ (ROOT/'artifacts/intro-loops.json').write_text(json.dumps(result,indent=2)+'\n')
+ loops.close()
  assert not errors,errors
  browser.close()
  # A denied autoplay attempt retries on a genuine first interaction, with no control bar.
@@ -130,4 +172,4 @@ with sync_playwright() as p:
  assert song(bp,'music.paused');assert bp.locator('.intro-controls').count()==0
  bp.mouse.click(15,300);bp.wait_for_function('!testAudios[0].paused && testAudios[0].currentTime>0',timeout=15000)
  blocked.close()
- print('PASS: exact media; audio starts before video load; quarter/off settings shared with game; blocked-autoplay interaction fallback; no bottom controls; pixel-verified seam-free background and complete original-logo removal; 72% sizing; hit targets; reduced motion and navigation.')
+ print('PASS: exact media; audio starts before video load; quarter/off settings shared with game; blocked-autoplay interaction fallback; no bottom controls; pixel-verified seam-free background and complete original-logo removal; 72% sizing; hit targets; reduced motion and navigation; three audible passes with logo reset and unbounded callback timestamps.')
