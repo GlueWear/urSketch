@@ -186,3 +186,34 @@ profile/room/rejoin/invite flows, known-host counts and filters, publication,
 and three audible intro passes. Live chat was read without posting test messages.
 The isolated fake ships were shut down after native delivery/migration checks.
 JavaScript/Python syntax and whitespace checks passed.
+
+## Game audio and round timing (0.12.0)
+
+`tests/game-sounds.py` uses isolated `~zod`/`~nec` on HTTP 18080/18081 and
+Lens 12322/12323. It checks ship identities before retrieving login codes
+in memory. Install the current desk and media on both fake ships, substituting
+`~zod` as the Global Chat host in their generated assets only.
+
+The test decodes all nine real MP3 files into Web Audio, exercises actual
+cross-ship room events, and checks private close feedback, correct-guess
+routing, hint acceptance, warning permissions and public chat, volume/mute,
+theme-song independence, snapshot deduplication, and artist rotation. It
+measures the native finish deadline and the 250 ms spacing of audio-clock
+source starts (80 ticks). It also verifies that refreshing does not replay
+historical cues. Results are in `artifacts/game-sounds-verification.json`.
+
+The native `+ursketch!ursketch-rules` generator additionally checks transposed
+letters and partial-word guesses, 120-second turns, a full 20-second finish
+window even on a late solve, persistent solve order after a correct guesser
+leaves, and saved-room migration. `+ursketch!ursketch-hints` and
+`+ursketch!ursketch-wire` continue to cover hints, scores and compact vectors.
+
+The audio cleanup report verifies identical decoded input/output sample
+counts. Its reference subtraction retains the complete YourTurnToDraw clip;
+the tail after reference overlap is unchanged before MP3 encoding.
+
+`tests/audio-clock.py` also checks actual nonzero decoded PCM in an isolated
+browser, background turn alerts, scheduling the whole remaining tick window
+in advance, and cancellation of future source nodes on mute/leave. Its result
+is `artifacts/audio-clock-verification.json`. Live comet smoke checks and the
+full intro/media regression passed on 0.12.0 without posting to Global Chat.

@@ -3,6 +3,24 @@
 ++  lookup
   |=  url=@t
   ^-  (unit [mime=@t etag=@t file=path])
+  ?:  =(url '/apps/ursketch/media/45ce5ea566101a31/audio/cues/CloseGuess.mp3')
+    `['audio/mpeg' '"45ce5ea566101a31cb2017c56d3ec86cfeea2c98e2da1c4aedd28adc7f56ca41"' /['media']/['audio']/['cues']/['CloseGuess']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/29269f063d4fefaf/audio/cues/HintNoise.mp3')
+    `['audio/mpeg' '"29269f063d4fefaf41af3b71ec499ab5a31f6bfc92ab44d0f6f3605d48b4c1e6"' /['media']/['audio']/['cues']/['HintNoise']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/f960ddde6b03f9ea/audio/cues/JoinRoom.mp3')
+    `['audio/mpeg' '"f960ddde6b03f9eaea42504e2d87b6487a64f1e81bfcd75baea573dfd908d969"' /['media']/['audio']/['cues']/['JoinRoom']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/192ae75c6062a0a2/audio/cues/NewRound.mp3')
+    `['audio/mpeg' '"192ae75c6062a0a26507d8f661c3ad9120f7d127fad454fb767670379488868c"' /['media']/['audio']/['cues']/['NewRound']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/c8f3b35dec323958/audio/cues/RemindsRules.mp3')
+    `['audio/mpeg' '"c8f3b35dec3239582bb1bbdad78150a6e9d44de08f246bb37d12e3b9effbe14a"' /['media']/['audio']/['cues']/['RemindsRules']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/c47a746566111b61/audio/cues/SomeoneElseGotTheWord.mp3')
+    `['audio/mpeg' '"c47a746566111b61855f9fab3271ad830d7604c1cc052f5a26fdb1ab4b575d5d"' /['media']/['audio']/['cues']/['SomeoneElseGotTheWord']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/b573d4be00730331/audio/cues/TickingNoise.mp3')
+    `['audio/mpeg' '"b573d4be00730331849677075746cd65b78731fa9853c30f919de782652af866"' /['media']/['audio']/['cues']/['TickingNoise']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/6a416efa93ae0731/audio/cues/YouGotTheWord.mp3')
+    `['audio/mpeg' '"6a416efa93ae0731a5bf94143806b222ab4a75149fc6c1da30a4f6324b774528"' /['media']/['audio']/['cues']/['YouGotTheWord']/['mp3']]
+  ?:  =(url '/apps/ursketch/media/262d70bca42c5ffc/audio/cues/YourTurnToDraw.mp3')
+    `['audio/mpeg' '"262d70bca42c5ffc21c8b66f5d66b9ce61bbce6c588d805551c0f66457f2b3f0"' /['media']/['audio']/['cues']/['YourTurnToDraw']/['mp3']]
   ?:  =(url '/apps/ursketch/media/dc3e0a37af589226/audio/music/theme_song.mp3')
     `['audio/mpeg' '"dc3e0a37af5892268bfa8b6a6e9cf30bde82f0ac248db4714b311ce9de10e10d"' /['media']/['audio']/['music']/['theme_song']/['mp3']]
   ?:  =(url '/apps/ursketch/media/3cd27feef6be5d8c/images/intro-poster.jpg')

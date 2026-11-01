@@ -1,0 +1,10 @@
+{
+  "decodedCues": 9,
+  "nonzeroPCM": true,
+  "backgroundCue": true,
+  "wholeWindowScheduledAhead": true,
+  "twoSecondTicks": 8,
+  "intervalSeconds": 0.25,
+  "muteCancelsScheduledSources": true,
+  "leavingStopsScheduler": true
+}

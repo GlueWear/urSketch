@@ -19,16 +19,24 @@
       chat.r
       0
       ~
+      0
   ==
 ++  migrate-v3
   |=  r=room-v3
   ^-  room
-  [title.r owner.r players.r phase.r turn.r token.r deadline.r answer.r choices.r lines.r chat.r 0 ~]
+  [title.r owner.r players.r phase.r turn.r token.r deadline.r answer.r choices.r lines.r chat.r 0 ~ 0]
+++  migrate-v5
+  |=  [r=room-v5 now=@da]
+  ^-  room
+  =/  solves=@ud  (lent (skim players.r |=(p=player solved.p)))
+  =/  finishing=?  ?&(?=(%drawing phase.r) (gth solves 0))
+  =/  deadline=@da  ?:(finishing (min deadline.r (add now ~s20)) deadline.r)
+  [title.r owner.r players.r phase.r turn.r token.r deadline answer.r choices.r lines.r chat.r hints.r revealed.r solves]
 ++  hint
   |=  [r=room now=@da]
   ^-  room
   ?>  ?&(?=(%drawing phase.r) (lth hints.r 3))
-  ?>  !(lien players.r |=(p=player solved.p))
+  ?>  ?&(=(solves.r 0) !(lien players.r |=(p=player solved.p)))
   =.  r  r(hints +(hints.r))
   ?:  =(hints.r 1)  r
   =/  letters=(list @tD)  (trip answer.r)
@@ -57,19 +65,17 @@
   =/  artist=?  ?&(?=(^ players.r) =(who who.i.players.r))
   =/  remaining=(list player)  (skip players.r |=(p=player =(who who.p)))
   ?~  remaining
-    r(players ~, phase %waiting, deadline ~2000.1.1, token +(token.r), lines ~, answer '', choices ~, hints 0, revealed ~)
+    r(players ~, phase %waiting, deadline ~2000.1.1, token +(token.r), lines ~, answer '', choices ~, hints 0, revealed ~, solves 0)
   =.  r  r(players remaining, owner ?:(=(who owner.r) who.i.remaining owner.r))
   ?:  (lth (lent remaining) 2)
-    r(phase %waiting, deadline ~2000.1.1, token +(token.r), answer '', choices ~, hints 0, revealed ~)
+    r(phase %waiting, deadline ~2000.1.1, token +(token.r), answer '', choices ~, hints 0, revealed ~, solves 0)
   ?:  ?&(artist ?|(?=(%choosing phase.r) ?=(%drawing phase.r) ?=(%reveal phase.r)))
     (choose r now)
-  ?:  ?&(?=(%drawing phase.r) (levy (slag 1 players.r) |=(p=player solved.p)))
-    (reveal r now)
   r
 ++  fresh
   |=  [title=@t owner=@p]
   ^-  room
-  [title owner ~[[owner 0 %.n]] %waiting 0 0 ~2000.1.1 '' ~ ~ ~ 0 ~]
+  [title owner ~[[owner 0 %.n]] %waiting 0 0 ~2000.1.1 '' ~ ~ ~ 0 ~ 0]
 ++  say
   |=  [r=room who=@t text=@t kind=@t]
   ^-  room
@@ -83,6 +89,60 @@
   |=  text=@t
   ^-  @t
   (crip (skip (cuss (trip text)) |=(c=@tD =(c ' '))))
+++  edit-distance
+  |=  [left=tape right=tape]
+  ^-  @ud
+  =/  n=@ud  (lent left)
+  =/  m=@ud  (lent right)
+  =/  i=@ud  1
+  =/  previous=(list @ud)  (gulf 0 m)
+  =/  older=(list @ud)  previous
+  |-  ^-  @ud
+  ?:  (gth i n)  (snag m previous)
+  =/  next=(list @ud)
+    =/  j=@ud  1
+    =/  row=(list @ud)  ~[i]
+    |-  ^-  (list @ud)
+    ?:  (gth j m)  (flop row)
+    =/  cost=@ud  ?:(=((snag (dec i) left) (snag (dec j) right)) 0 1)
+    =/  value=@ud
+      (min (add cost (snag (dec j) previous)) (min +((snag j previous)) +((snag 0 row))))
+    =.  value
+      ?:  ?&  (gth i 1)
+              (gth j 1)
+              =((snag (dec i) left) (snag (sub j 2) right))
+              =((snag (sub i 2) left) (snag (dec j) right))
+          ==
+        (min value +((snag (sub j 2) older)))
+      value
+    $(j +(j), row [value row])
+  $(i +(i), older previous, previous next)
+++  close-guess
+  |=  [guess=@t answer=@t]
+  ^-  ?
+  =/  a=tape  (trip (normalize guess))
+  =/  b=tape  (trip (normalize answer))
+  ?:  =(a b)  %.n
+  =/  n=@ud  (lent a)
+  =/  m=@ud  (lent b)
+  ?.  ?&((gte m 3) (gte n 2))  %.n
+  =/  large=@ud  (max n m)
+  =/  small=@ud  (min n m)
+  =/  allowed=@ud  (max 1 (div large 4))
+  ?:  ?&((lte (sub large small) allowed) (lte (edit-distance a b) allowed))  %.y
+  =/  span=@ud  (max 3 (max (div +(large) 2) (div (add (mul small 6) 9) 10)))
+  ?:  (gth span small)  %.n
+  =/  short=tape  ?:(=(small n) a b)
+  =/  long=tape  ?:(=(small n) b a)
+  %+  lien  (gulf 0 (sub small span))
+  |=  offset=@ud
+  ?=(^ (find (scag span (slag offset short)) long))
+++  finish-window
+  |=  [r=room solver=@p now=@da]
+  ^-  room
+  =/  first=?  =(solves.r 0)
+  =.  r  (award r solver)
+  ?:(first r(deadline (add now ~s20)) r)
 ++  guess-points
   |=  previous=@ud
   ^-  @ud
@@ -94,9 +154,10 @@
 ++  award
   |=  [r=room solver=@p]
   ^-  room
-  =/  previous=@ud  (lent (skim players.r |=(p=player solved.p)))
+  =/  previous=@ud  solves.r
   =/  artist=@p  who:(head players.r)
   %=  r
+    solves  +(previous)
     players
       %+  turn  players.r
       |=  p=player
@@ -122,13 +183,14 @@
       lines  ~
       hints  0
       revealed  ~
+      solves  0
       players  (turn players.r |=(p=player p(solved %.n)))
     ==
   ['Room' 'A new artist is choosing a word.' 'system']
 ++  begin
   |=  [r=room word=@t now=@da]
   ^-  room
-  r(phase %drawing, answer word, choices ~, token +(token.r), deadline (add now ~s80), hints 0, revealed ~)
+  r(phase %drawing, answer word, choices ~, token +(token.r), deadline (add now ~s120), hints 0, revealed ~, solves 0)
 ++  reveal
   |=  [r=room now=@da]
   ^-  room

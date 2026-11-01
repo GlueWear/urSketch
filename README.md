@@ -7,7 +7,7 @@ services. All browser assets are embedded and served by the ship.
 
 ## Install from the publisher
 
-urSketch 0.11.0 is published from
+urSketch 0.12.0 is published from
 `~livbec-pitsyd-botryp-hoshec--faltec-lavtel-firrup-marzod`.
 On another ship, run:
 
@@ -76,7 +76,7 @@ preferences from another app are separate; create new rooms and invitations.
   `~sampel-palnet/room-abcd1234` are retained; invite-entry controls are currently
   hidden from the browser. No one needs to log into another player’s ship.
 - The owner starts the game. Each artist chooses among three words in 15 seconds,
-  then has 80 seconds to draw. Guessers use the input under the Game log.
+  then has 120 seconds to draw. The first correct guess starts a full 20-second finish window. Guessers use the input under the Game log.
 - Correct guesses earn 10, 9, 8, 7, 6, then 5 points each. The drawer earns
   10 points for the first solve and 1 for each additional solve. Hints reduce
   that initial artist reward to 5, then 4, then 3 points. No solves means
@@ -91,7 +91,7 @@ preferences from another app are separate; create new rooms and invitations.
   a test sound, theme, reduced motion, and larger chat text. Preferences are
   saved in this browser. Default and Classic are available; Classic uses the supplied drawer/
   guesser layouts, floating palettes, compact panes, and original control sprites. Grubbery
-  Theme is a coming-soon placeholder. Game sound effects will be added later.
+  Theme is a coming-soon placeholder. Game effects honor the same master volume, mute, and output device.
   Output selection depends on [browser support](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId);
   unsupported browsers use system default. Microphone permission is not requested.
 - Players rotate through three rounds. The owner can start another game afterward.
@@ -177,8 +177,8 @@ now target follows its button frame by frame; Instructions opens the rules.
 Play now opens the separate username screen; Connect saves the display name
 and opens the room browser. Direct invitations still open the game.
 
-The music is `desk/media/audio/music/theme_song.mp3`. Future cue files belong
-in `desk/media/audio/cues/`; game cue events are not wired yet. The theme starts
+The music is `desk/media/audio/music/theme_song.mp3`. Game cue files live
+in `desk/media/audio/cues/` and play from confirmed room events. The theme starts
 immediately without waiting for video loading, subject to browser autoplay
 permissions and saved mute preferences. If autoplay is blocked, the first real
 click or key retries it; there is no bottom control bar.
@@ -262,3 +262,31 @@ the room-player total unless they are in a room.
 Agent state 5 adds chat history. Migration copies existing rooms, drawing data,
 profiles, proxy caches and presence leases from state 4; older migrations remain
 supported. The upgrade was verified with a room active on an isolated ship.
+
+## Game sounds (0.12.0)
+
+The nine provided cues cover joining, new drawing turns, your turn to draw,
+private close guesses, your correct guess, another player’s correct guess,
+accepted hints, player rules reminders, and the finish timer. The player menu
+offers **Warn about game rules**; reminders appear in the bottom room Chat.
+
+Close guesses are checked on the host using normalized edit distance (including
+transposed letters) and substantial contiguous matches. Only the sender receives
+the “guess is close!” response; the answer stays on the host.
+
+Drawing turns last 120 seconds. The first solve starts a full 20-second finish
+window; later solves do not reset it. Even when everyone has solved, the timer
+continues until its deadline (the artist can still choose Done). Solve order and the finish window survive a correct guesser leaving. Saved
+rooms upgrade to state 6 while preserving drawings, scores, names, hints, and
+shared chat. Four ticks per
+second are scheduled on the Web Audio clock. Leaving, muting,
+or ending the turn stops scheduled ticks. The remaining ticks are scheduled
+in advance so background-tab timer throttling cannot change their tempo;
+turn alerts can also sound while the game is in a background tab. Snapshot history does not replay cues.
+A browser interaction enables game audio; browsers enforce this autoplay rule.
+
+`scripts/clean_turn_audio.py` subtracts the aligned SomeoneElseGotTheWord reference
+from YourTurnToDraw using fractional delay and a smoothly varying gain. It keeps
+all 92,160 stereo samples (44.1 kHz) and does not crop the clip. The original is
+kept in `assets/audio-originals/`; the reproducible report is
+`artifacts/turn-audio-cleanup.json`. Rerunning requires NumPy, SciPy, and ffmpeg.

@@ -1,4 +1,4 @@
-/* Browser-local preferences and the audio output used by future game sounds. */
+/* Browser-local preferences and the audio output used by game sounds. */
 function createSettings({notify,onChange}) {
   const $=id=>document.getElementById(id),key='ursketch.settings.v1';
   const defaults={theme:'default',volume:70,muted:false,output:'',reduceMotion:false,largeChat:false,themeQuiet:false,themeDisabled:false};

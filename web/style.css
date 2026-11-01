@@ -59,3 +59,5 @@ body:not([data-theme=classic]) #hints-used{position:absolute;width:1px;height:1p
 /* URSKETCH_CONNECT */
 
 /* URSKETCH_BROWSER */
+
+.message.close,.message.warning{color:#ad4138}

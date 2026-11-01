@@ -5,6 +5,7 @@
 """
 import json
 import os
+import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -21,7 +22,7 @@ def change(name):
     path = ROOT / name
     mark = path.suffix[1:]
     parts = path.relative_to(ROOT).with_suffix('').parts
-    destination = '/=ursketch=/' + '/'.join("['"+part+"']" if '_' in part else part for part in parts) + '/' + mark
+    destination = '/=ursketch=/' + '/'.join(part if re.fullmatch(r'[a-z][a-z0-9-]*',part) else '['+cord(part)+']' for part in parts) + '/' + mark
     if remove:
         return f'(fray:space:userlib {destination})'
     if mark == 'hoon':

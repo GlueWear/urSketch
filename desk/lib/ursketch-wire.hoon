@@ -86,6 +86,7 @@
     =/  fields=(map @t json)  (~(put by p.old) 'lines' a+(welp prior added))
     =.  fields  (~(put by fields) 'count' (numb finish))
     =.  fields  (~(put by fields) 'seconds' (numb (number update 'seconds')))
+    =.  fields  (~(put by fields) 'remainingMs' (numb (optional-number update 'remainingMs' (mul 1.000 (number update 'seconds')))))
     `[%o fields]
   ?.  =(kind 'state')  ~
   =/  count=@ud  (number update 'count')

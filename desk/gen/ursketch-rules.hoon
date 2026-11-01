@@ -11,6 +11,31 @@
 =/  r=room  r
 =.  r  (advance:ursketch-game r deadline.r)
 ?>  ?&(?=(%drawing phase.r) !=('' answer.r) =(2 token.r))
+?>  =(deadline.r (add now ~s135))
+=/  finishing=room  (finish-window:ursketch-game r ~nec (add now ~s134))
+?>  =(deadline.finishing (add now ~s154))
+?>  ?=(%drawing phase.finishing)
+?>  =(token.finishing token.r)
+=/  crew=room  r(players ~[[~zod 0 %.n] [~nec 0 %.n] [~bud 0 %.n] [~wes 0 %.n]])
+=.  crew  (finish-window:ursketch-game crew ~nec (add now ~s20))
+=.  crew  (depart:ursketch-game crew ~nec (add now ~s21))
+?>  =(1 solves.crew)
+?>  ?=(~ (mole |.((hint:ursketch-game crew now))))
+=.  crew  (finish-window:ursketch-game crew ~bud (add now ~s24))
+?>  =(deadline.crew (add now ~s40))
+?>  =((turn players.crew |=(p=player score.p)) ~[11 9 0])
+=/  saved=room-v5
+  ['Version five' ~zod ~[[~zod 10 %.n] [~nec 10 %.y] [~bud 0 %.n]] %drawing 2 7 (add now ~s120) 'cat' ~ ~ ~ 1 ~]
+=/  upgraded=room  (migrate-v5:ursketch-game saved now)
+?>  ?&(=(1 solves.upgraded) =(deadline.upgraded (add now ~s20)) =(1 hints.upgraded))
+?>  (close-guess:ursketch-game 'stairway' 'staircase')
+?>  (close-guess:ursketch-game 'stairs' 'staircase')
+?>  (close-guess:ursketch-game 'elehpant' 'elephant')
+?>  (close-guess:ursketch-game 'airplan' 'airplane')
+?>  (close-guess:ursketch-game 'ct' 'cat')
+?>  !(close-guess:ursketch-game 'a' 'airplane')
+?>  !(close-guess:ursketch-game 'cat' 'cat')
+?>  !(close-guess:ursketch-game 'potato' 'airplane')
 =/  r=room  r
 =.  r  (advance:ursketch-game r deadline.r)
 ?>  ?&(?=(%reveal phase.r) =(3 token.r))
@@ -49,4 +74,4 @@
 ?>  ?=(~ players.empty)
 =/  reassigned=room  (depart:ursketch-game migrated ~zod now)
 ?>  ?&(?=(%waiting phase.reassigned) =(~nec owner.reassigned))
-[%noun 'PASS: timers, rotation, scoring, saved drawing migration, and departure rules']
+[%noun 'PASS: close guesses, 120/20 timers, departure-safe solve order, saved rooms, rotation and scoring']

@@ -1,0 +1,18 @@
+{
+  "isolatedShips": [
+    "~zod",
+    "~nec"
+  ],
+  "decodedCues": 9,
+  "privateCloseGuess": true,
+  "publicWarningAndValidation": true,
+  "correctCueRouting": true,
+  "hintsAndDeduplication": true,
+  "drawingSeconds": 120,
+  "finishSeconds": 20,
+  "measuredFinishSeconds": 20.12,
+  "tickCount": 81,
+  "tickIntervalSeconds": 0.25,
+  "masterGainMuteAndThemeIndependence": true,
+  "refreshDoesNotReplay": true
+}

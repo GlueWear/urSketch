@@ -18,6 +18,22 @@
       chat=(list message)
       hints=@ud
       revealed=(set @ud)
+      solves=@ud
+  ==
++$  room-v5
+  $:  title=@t
+      owner=@p
+      players=(list player)
+      phase=?(%waiting %choosing %drawing %reveal %finished)
+      turn=@ud
+      token=@ud
+      deadline=@da
+      answer=@t
+      choices=(list @t)
+      lines=(list line)
+      chat=(list message)
+      hints=@ud
+      revealed=(set @ud)
   ==
 +$  room-v3
   $:  title=@t

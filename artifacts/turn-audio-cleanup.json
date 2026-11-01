@@ -1,0 +1,14 @@
+{
+  "method": "fractional-delay reference cancellation with smooth local gain; no cropping",
+  "sampleRate": 44100,
+  "channels": 2,
+  "inputSamples": 92160,
+  "outputSamples": 92160,
+  "durationSeconds": 2.089795918367347,
+  "referenceOffsetSamples": -2495,
+  "fractionalOffsetSamples": -0.2798740384346545,
+  "maximumGain": 1.3638097774346558,
+  "removedSignalRms": 0.06575977661586382,
+  "unmodifiedTailStartsAtSeconds": 0.674875283446712,
+  "tailErrorBeforeEncoding": 0.0
+}

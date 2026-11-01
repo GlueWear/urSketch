@@ -195,7 +195,7 @@ with sync_playwright() as p:
     page.locator('#players .player-name').first.click()
     expect(page.locator('#player-profile-name')).to_have_text('Sketch Player')
     expect(page.locator('#player-profile-ship')).to_have_text(page.evaluate('SELF'))
-    page.locator('#player-profile-dialog button').click()
+    page.locator('#player-profile-dialog form button').click()
     page.screenshot(path=str(artifacts / 'comet-room.png'), full_page=True)
     room = page.evaluate('roomId')
     page.goto('http://127.0.0.1/apps/ursketch/play')

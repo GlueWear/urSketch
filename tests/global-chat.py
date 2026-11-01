@@ -44,7 +44,7 @@ with sync_playwright() as p:
  assert h.evaluate("api.poke('global-chat',{text:'x'.repeat(241)},{host:GLOBAL_CHAT_HOST,room:''}).then(()=>false,()=>true)")
  assert h.evaluate("api.poke('global-chat',{text:'bad\\nmessage'},{host:GLOBAL_CHAT_HOST,room:''}).then(()=>false,()=>true)")
  g.reload();expect(g.locator('#global-chat-input')).to_be_enabled(timeout=30000);expect(g.locator('#global-messages')).to_contain_text(first);expect(g.locator('#global-messages')).to_contain_text(third)
- g.locator('#global-messages .global-chat-name').filter(has_text='Alice').first.click();expect(g.locator('#player-profile-ship')).to_have_text('~zod');g.locator('#player-profile-dialog button').click()
+ g.locator('#global-messages .global-chat-name').filter(has_text='Alice').first.click();expect(g.locator('#player-profile-ship')).to_have_text('~zod');g.locator('#player-profile-dialog form button').click()
  g.screenshot(path=str(ROOT/'artifacts/global-chat-fake-ships.png'))
  (ROOT/'artifacts/global-chat-verification.json').write_text(json.dumps({'isolatedShips':['~zod','~nec'],'sharedHost':'~zod','bothDirections':True,'senderIdentityVerified':True,'searchIndependent':True,'refreshHistory':True,'failedSendRetainsDraft':True,'boundsAndCooldown':True,'plainTextRendering':True},indent=2)+'\n')
  assert not errors,errors;browser.close()

@@ -42,7 +42,7 @@ body.playing[data-theme=classic] .player-score{font:11px/16px Verdana,Arial,sans
 body.playing[data-theme=classic] .message-log{padding:3px 7px;background:#ffffdc;color:#000;font:11px/14px Verdana,Arial,sans-serif}
 body.playing[data-theme=classic] .message{margin:0;font:inherit}
 body.playing[data-theme=classic] .message b{font:700 11px/14px Verdana,Arial,sans-serif;color:inherit;margin-right:2px}
-body.playing[data-theme=classic] .message.system,body.playing[data-theme=classic] .message.correct,body.playing[data-theme=classic] .message.answer{color:#f00;font-size:11px;font-weight:normal}
+body.playing[data-theme=classic] .message.system,body.playing[data-theme=classic] .message.correct,body.playing[data-theme=classic] .message.answer,body.playing[data-theme=classic] .message.close,body.playing[data-theme=classic] .message.warning{color:#f00;font-size:11px;font-weight:normal}
 body.playing[data-theme=classic] .message.chat,body.playing[data-theme=classic] .message.guess{color:#000}
 body.playing[data-theme=classic] .chat{grid-area:3/1;margin-top:-5px;min-height:0;height:auto}
 body.playing[data-theme=classic] .chat .panel-label{font-weight:normal}

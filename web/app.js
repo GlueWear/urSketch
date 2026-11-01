@@ -10,6 +10,7 @@ let activeName = SELF, profiles = [];
 const profileKey = `ursketch.players.${SELF}`;
 let host = SELF, roomId = '', state = null, lobbySub = null, roomSub = null;
 let drawing;
+let gameAudio=null,roomTimeline=[],serverMessages=[],feedbackSeen=new Set();
 let clockAt = 0, clockSeconds = 0, connectionReady = false;
 const ctx = $('canvas').getContext('2d');
 // Swatch centers sampled from the supplied palette reference; black/white are exact.
@@ -100,7 +101,7 @@ function saveRecovery(record){savedRoom=record;try{record?localStorage.setItem(r
 function rememberRoom(title){if(!roomId)return;saveRecovery({host,id:roomId,title:title||state?.title||savedRoom?.title||roomId,expiresAt:Date.now()+GRACE_MS});}
 function renderRecovery(){const visible=!!savedRoom&&!state;$('room-recovery').hidden=!visible;if(!visible)return;const seconds=Math.max(0,Math.ceil((savedRoom.expiresAt-Date.now())/1000));$('recovery-title').textContent=savedRoom.title;$('recovery-detail').textContent=`On ${savedRoom.host} · Rejoin available for ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;}
 function restoreRecovery(){savedRoom=null;try{const r=JSON.parse(localStorage.getItem(recoveryKey)||'null');if(r&&/^~[a-z-]+$/.test(r.host)&&/^[a-z0-9-]{1,40}$/.test(r.id)&&Number.isFinite(r.expiresAt))savedRoom=r;}catch{}renderRecovery();}
-function showLobby({keepRoom=true}={}){const old=roomSub;roomEpoch++;if(snapshotRequest){clearTimeout(snapshotRequest.timer);snapshotRequest=null;}roomId='';state=null;roomSub=null;if(old!=null)api.unsubscribe(old).catch(()=>{});drawing?.cancel();$('game').hidden=true;$('lobby').hidden=false;document.body.classList.remove('playing','is-artist','is-guesser');history.replaceState(null,'',location.pathname);if(!keepRoom)saveRecovery(null);renderRecovery();}
+function showLobby({keepRoom=true}={}){const old=roomSub;roomEpoch++;if(snapshotRequest){clearTimeout(snapshotRequest.timer);snapshotRequest=null;}roomId='';state=null;roomSub=null;gameAudio?.stop();roomTimeline=[];serverMessages=[];feedbackSeen.clear();if(old!=null)api.unsubscribe(old).catch(()=>{});drawing?.cancel();$('game').hidden=true;$('lobby').hidden=false;document.body.classList.remove('playing','is-artist','is-guesser');history.replaceState(null,'',location.pathname);if(!keepRoom)saveRecovery(null);renderRecovery();}
 const knownHostsKey=`ursketch.hosts.${SELF}`,knownHosts=new Map();
 let hideFull=false,hideEmpty=false;
 try{const saved=JSON.parse(localStorage.getItem('ursketch.roomFilters')||'{}');hideFull=saved.full===true;hideEmpty=saved.empty===true;}catch{}
@@ -204,14 +205,22 @@ function requestDrawingSnapshot(){
   api.poke('sync').catch(e=>{if(snapshotRequest===request){clearTimeout(request.timer);snapshotRequest=null;toast(e.message);}});
 }
 function roomEvent(data){
+  if(data.kind==='feedback'){
+    if(data.feedback==='close'&&state?.phase==='drawing'&&data.room===roomId&&data.token===state.token&&!feedbackSeen.has(data.id)){
+      feedbackSeen.add(data.id);if(feedbackSeen.size>100)feedbackSeen.delete(feedbackSeen.values().next().value);
+      roomTimeline.push({who:'',text:data.text,kind:'close'});roomTimeline=roomTimeline.slice(-160);renderRoomMessages();void gameAudio?.play('CloseGuess');
+    }
+    return null;
+  }
   if(data.kind==='draw'){
     if(!state){requestDrawingSnapshot();return null;}
     if(data.token<state.token)return null;
     if(data.token!==state.token){requestDrawingSnapshot();return null;}
     if(data.count<=state.lines.length)return null;
     if(data.from!==state.lines.length||data.count!==data.from+data.lines.length){requestDrawingSnapshot();return null;}
-    state.lines.push(...data.lines.map(l=>UrSketchWire.unpack(l)));state.count=data.count;state.seconds=data.seconds;
-    clockSeconds=data.seconds;clockAt=performance.now();
+    state.lines.push(...data.lines.map(l=>UrSketchWire.unpack(l)));state.count=data.count;state.seconds=data.seconds;state.remainingMs=data.remainingMs;
+    clockSeconds=(data.remainingMs??data.seconds*1000)/1000;clockAt=performance.now();
+    gameAudio?.countdown(state.finishing?clockSeconds*1000:null);
     drawing.render(state.lines,state.token);updateDial();
     return null;
   }
@@ -228,7 +237,9 @@ function roomEvent(data){
 }
 async function joinRoom(id,title=''){
   if(joining)throw new Error('A room is already opening.');
+  const recovering=savedRoom?.id===id&&savedRoom?.host===host;
   const epoch=++roomEpoch;let firstView=true;
+  gameAudio?.stop();roomTimeline=[];serverMessages=[];feedbackSeen.clear();
   joining=true;roomId=id;state=null;operation('join-status',`Joining ${title||id}`,true);busyControls();
   let accepted=false;
   try{
@@ -251,6 +262,7 @@ async function joinRoom(id,title=''){
     $('lobby').hidden=true;$('game').hidden=false;$('room-host').textContent=`HOSTED BY ${host.toUpperCase()}`;
     document.body.classList.add('playing');requestAnimationFrame(fitCanvas);history.replaceState(null,'',`?host=${encodeURIComponent(host)}&room=${id}`);
     rememberRoom(state.title);operation('join-status','');
+    if(!recovering)void gameAudio?.play('JoinRoom');
   }catch(e){showLobby({keepRoom:accepted||!!savedRoom});operation('join-status',`Could not join: ${e.message}`);throw e;}
   finally{joining=false;busyControls();}
 }
@@ -282,12 +294,40 @@ window.addEventListener('pagehide',()=>{if(!api.events&&!api.opening)return;cons
 
 function isArtist() { return state?.players[0]?.ship === SELF; }
 function canDraw() { return connectionReady && state?.phase === 'drawing' && isArtist(); }
+function appendRoomMessages(messages){
+  const key=m=>JSON.stringify([m.who,m.kind,m.text]);
+  let overlap=Math.min(serverMessages.length,messages.length);
+  while(overlap&&!serverMessages.slice(-overlap).every((m,i)=>key(m)===key(messages[i])))overlap--;
+  const fresh=messages.slice(overlap);roomTimeline.push(...fresh);roomTimeline=roomTimeline.slice(-160);serverMessages=messages;
+  return fresh;
+}
+function renderRoomMessages(){
+  renderMessages('messages',roomTimeline.filter(m=>!['chat','warning'].includes(m.kind)));
+  renderMessages('chat-messages',roomTimeline.filter(m=>['chat','warning'].includes(m.kind)||(m.kind==='system'&&m.text==='joined the room')));
+}
+function roomSounds(before,after,fresh){
+  if(before){
+    if(after.players.some(p=>!before.players.some(old=>old.ship===p.ship)))void gameAudio?.play('JoinRoom');
+    if(after.phase==='choosing'&&(before.phase!=='choosing'||before.token!==after.token)&&after.players[0]?.ship===SELF)void gameAudio?.play('YourTurnToDraw');
+    if(after.phase==='drawing'&&(before.phase!=='drawing'||before.token!==after.token))void gameAudio?.play('NewRound');
+    if(after.phase==='drawing'&&before.phase==='drawing'&&before.token===after.token){
+      const solved=after.players.filter(p=>p.solved&&before.players.some(old=>old.ship===p.ship&&!old.solved));
+      if(solved.some(p=>p.ship===SELF))void gameAudio?.play('YouGotTheWord');
+      if(solved.some(p=>p.ship!==SELF))void gameAudio?.play('SomeoneElseGotTheWord');
+      if(after.hintCount>before.hintCount)void gameAudio?.play('HintNoise');
+    }
+    if(fresh.some(m=>m.kind==='warning'))void gameAudio?.play('RemindsRules');
+  }
+  gameAudio?.countdown(after.phase==='drawing'&&after.finishing?(after.remainingMs??after.seconds*1000):null);
+}
 function renderRoom(data) {
   if (data.kind === 'removed') { localLeave(); return; }
   if (data.kind !== 'room') return;
   if (!data.players.some(p => p.ship === SELF)) { localLeave(); return; }
   const changedTurn=state?.token!==data.token;
-  state=data;clockSeconds=data.seconds;clockAt=performance.now();
+  const before=state,fresh=appendRoomMessages(data.messages);
+  state=data;clockSeconds=(data.remainingMs??data.seconds*1000)/1000;clockAt=performance.now();
+  roomSounds(before,data,fresh);
   if(changedTurn)drawing?.cancel();
   $('room-title').textContent=data.title;
   document.body.classList.toggle('is-artist',isArtist()&&data.phase==='drawing');
@@ -313,7 +353,7 @@ function renderRoom(data) {
   $('choices').replaceChildren(...data.choices.map(word=>{const button=element('button','',word);button.onclick=()=>run(()=>api.poke('choose',{word}));return button;}));
   $('tools').hidden=!(isArtist()&&data.phase==='drawing');
   $('round-controls').hidden=!(isArtist()&&data.phase==='drawing');
-  const hintCount=data.hintCount||0,solved=data.players.some(p=>p.solved);
+  const hintCount=data.hintCount||0,solved=data.finishing||data.players.some(p=>p.solved);
   $('hints-used').textContent=`${hintCount}/3`;
   $('give-hint').disabled=!canDraw()||hintCount>=3||solved||data.hintCount==null;
   $('give-hint').title=solved?'Hints close after the first correct guess':hintCount>=3?'All three hints have been used':`Give hint — artist reward becomes ${hintCount===0?5:hintCount===1?4:3} points`;
@@ -327,16 +367,15 @@ function renderRoom(data) {
   const me=data.players.find(p=>p.ship===SELF),locked=data.phase!=='drawing'||isArtist()||me?.solved;
   $('guess').disabled=locked;$('guess-form').querySelector('button').disabled=locked;
   $('guess').placeholder=data.phase!=='drawing'?'Guesses open when a round starts':isArtist()?'You’re drawing this turn':me?.solved?'You guessed it!':'Type your guess…';
-  renderMessages('messages',data.messages.filter(m=>m.kind!=='chat'));
-  renderMessages('chat-messages',data.messages.filter(m=>m.kind==='chat'||(m.kind==='system'&&m.text==='joined the room')));
-  $('skip').textContent=data.players.some(p=>p.solved)?'Done':'Skip';
-  $('round-controls').dataset.done=String(data.players.some(p=>p.solved));
+  renderRoomMessages();
+  $('skip').textContent=solved?'Done':'Skip';
+  $('round-controls').dataset.done=String(solved);
   updateDial();requestAnimationFrame(fitCanvas);
 }
-function renderMessages(id,messages){const list=$(id);const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<50;list.replaceChildren(...messages.map(m=>{const row=element('div',`message ${m.kind}`);row.append(element('b','',m.who+':'),document.createTextNode(m.text));return row;}));if(atBottom)list.scrollTop=list.scrollHeight;}
+function renderMessages(id,messages){const list=$(id);const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<50;list.replaceChildren(...messages.map(m=>{const row=element('div',`message ${m.kind}`);if(m.who)row.append(element('b','',m.who+':'));row.append(document.createTextNode(m.text));return row;}));if(atBottom)list.scrollTop=list.scrollHeight;}
 function updateDial() {
   const dial=$('timer-dial'), inactive=!state||['waiting','finished'].includes(state.phase);
-  const duration=state?.duration || ({choosing:15,drawing:80,reveal:7}[state?.phase] || 80);
+  const duration=state?.duration || ({choosing:15,drawing:120,reveal:7}[state?.phase] || 120);
   const remaining=inactive?0:Math.max(0,clockSeconds-(performance.now()-clockAt)/1000);
   dial.style.setProperty('--sweep',`${Math.min(1,remaining/duration)*360}deg`);
   dial.classList.toggle('inactive',inactive);dial.classList.toggle('urgent',remaining<=20&&state?.phase==='drawing');
@@ -383,7 +422,12 @@ $('profile-form').onsubmit=async event=>{
     rememberProfile(name);location.assign('/apps/ursketch/play');
   }catch(error){$('connect-error').textContent=error.message||'Could not connect. Please try again.';button.disabled=false;button.textContent='Connect';}
 };
-function inspectPlayer(player){$('player-profile-name').textContent=player.name||player.ship;$('player-profile-ship').textContent=player.ship;$('player-profile-dialog').showModal();}
+function inspectPlayer(player){
+  $('player-profile-name').textContent=player.name||player.ship;$('player-profile-ship').textContent=player.ship;
+  const button=$('warn-player');button.hidden=!state||player.ship===SELF||!state.players.some(p=>p.ship===player.ship);button.disabled=false;
+  button.onclick=()=>run(async()=>{button.disabled=true;try{await api.poke('warn',{player:player.ship});$('player-profile-dialog').close();}finally{button.disabled=false;}});
+  $('player-profile-dialog').showModal();
+}
 function installClassicScrollbars(){
   for(const id of ['players','messages','chat-messages','browser-guide','room-list']){
     const content=$(id),shell=element('div','classic-scroll-shell'),rail=element('div','classic-scrollbar');
@@ -421,6 +465,7 @@ function fitCanvas(){const wrap=$('canvas').parentElement;if(!wrap.clientWidth||
 new ResizeObserver(fitCanvas).observe($('canvas').parentElement);
 try{const saved=JSON.parse(localStorage.getItem(profileKey)||'null');if(saved){profiles=(saved.names||[]).filter(n=>typeof n==='string'&&validPlayerName(n));if(profiles.includes(saved.active))activeName=saved.active;}}catch{}
 installClassicScrollbars();
-const preferences=createSettings({notify:toast,onChange:()=>{syncThemeLayout();requestAnimationFrame(fitCanvas);}});
+const preferences=createSettings({notify:toast,onChange:()=>{gameAudio?.settings();syncThemeLayout();requestAnimationFrame(fitCanvas);}});
+if(!connectPage)gameAudio=createGameAudio({urls:URSKETCH_CUE_URLS,getPrefs:()=>preferences.values,notify:toast});
 renderProfiles();drawing=createDrawing({canvas:$('canvas'),colors,canDraw,send:(action,data)=>api.poke(action,action==='draw'&&roomStream?{encoding:1,lines:data.lines.map(l=>UrSketchWire.pack(l))}:data),error:e=>toast(e.message||String(e)),storageKey:`ursketch.palettes.${SELF}`});restoreRecovery();
 if(!connectPage)run(async()=>{if(!SELF)throw new Error('Open urSketch through your Urbit ship at /apps/ursketch.');const query=new URLSearchParams(location.search);restoreKnownHosts();void connectGlobalChat();await browse(query.get('host')||SELF);void watchOtherHosts();const id=query.get('room');if(id){if(!savedRoom)saveRecovery({host,id,title:id,expiresAt:Date.now()+GRACE_MS});await joinRoom(id);}});

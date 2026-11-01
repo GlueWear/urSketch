@@ -31,9 +31,11 @@ for name in ('skip', 'done'):
 html = html.replace('<script>/* URSKETCH_DRAWING */', '<script>window.URSKETCH_SHIP=URSKETCH_SHIP_VALUE;/* URSKETCH_DRAWING */', 1)
 html = html.replace('/* URSKETCH_DRAWING */', (ROOT / 'web/drawing.js').read_text())
 html = html.replace('/* URSKETCH_SETTINGS */', (ROOT / 'web/settings.js').read_text())
+cue_urls = {Path(name).stem:asset['url'] for name,asset in assets.items() if name.startswith('audio/cues/')}
+html = html.replace('/* URSKETCH_AUDIO */', (ROOT/'web/audio.js').read_text())
 chat_host=json.loads((ROOT/'web/chat-config.json').read_text())['host']
 if not re.fullmatch(r'~[a-z-]+',chat_host): raise ValueError('Invalid Global Chat host')
-html = html.replace('/* URSKETCH_JS */', (ROOT / 'web/app.js').read_text().replace('URSKETCH_GLOBAL_CHAT_HOST', json.dumps(chat_host)))
+html = html.replace('/* URSKETCH_JS */', (ROOT / 'web/app.js').read_text().replace('URSKETCH_GLOBAL_CHAT_HOST', json.dumps(chat_host)).replace('URSKETCH_CUE_URLS', json.dumps(cue_urls)))
 before, after = html.split('URSKETCH_SHIP_VALUE', 1)
 intro = (ROOT/'web/intro.html').read_text().replace('URSKETCH_FAVICON_DATA_URL', FAVICON_DATA_URL)
 settings_dialog = re.search(r'<dialog id="settings-dialog".*?</dialog>', html, re.DOTALL).group()
